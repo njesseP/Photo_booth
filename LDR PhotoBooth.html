@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>LDR PhotoBooth</title>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Patrick+Hand&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff7ee;--cd:#fff;--pk:#ffc2d4;--p2:#ff7aa2;--dk:#3b2a35;--mu:#8a6f7d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#241a21;--cd:#33252e;--pk:#6b3347;--dk:#ffeef3;--mu:#d3aebc}}
+:root[data-theme=dark]{--bg:#241a21;--cd:#33252e;--pk:#6b3347;--dk:#ffeef3;--mu:#d3aebc}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;font:500 16px Quicksand,sans-serif;background:var(--bg);color:var(--dk)}
+h1,h2,.hand{font-family:Pacifico,cursive;font-weight:400}
+header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:10px 18px;background:var(--cd);border-bottom:3px dashed var(--pk)}
+.logo{display:flex;align-items:center;gap:8px;font:22px Pacifico,cursive;color:var(--p2);text-decoration:none}
+nav{display:flex;flex-wrap:wrap;gap:4px}nav a{padding:6px 12px;border-radius:99px;color:var(--dk);text-decoration:none;font-weight:700;transition:.2s}nav a:hover,nav a.on{background:var(--pk);transform:translateY(-2px)}
+main{max-width:1200px;margin:auto;padding:18px}
+button,.btn,select,input,textarea{font:inherit;color:var(--dk)}
+button,.btn{background:var(--pk);border:2px solid var(--dk);border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
+button:hover,.btn:hover{transform:translateY(-2px) rotate(-1deg);background:var(--p2);color:#fff}
+.big{font-size:20px;padding:14px 30px;background:var(--p2);color:#fff}
+input,select,textarea{background:var(--cd);border:2px solid var(--pk);border-radius:14px;padding:7px 10px;max-width:100%}
+input[type=color]{padding:0;width:40px;height:34px}input[type=range]{padding:0;accent-color:var(--p2)}
+.hero{text-align:center;padding:50px 10px;background:linear-gradient(#ffd6e3,#fff0f5);border-radius:32px;position:relative;overflow:hidden;color:#3b2a35}
+.hero h1{font-size:clamp(34px,7vw,64px);margin:0 0 6px;color:#e8466f}.hero p{font-size:20px}
+.fl{position:absolute;font-size:34px;animation:fl 6s ease-in-out infinite;opacity:.8}@keyframes fl{50%{transform:translateY(-22px) rotate(12deg)}}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--cd);border:2px solid var(--pk);border-radius:99px;padding:6px 14px;cursor:pointer;font-weight:700}.chip:hover{background:var(--pk)}
+.booth{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:18px;align-items:start}@media(max-width:900px){.booth{grid-template-columns:1fr}}
+.stage{text-align:center;position:sticky;top:70px}@media(max-width:900px){.stage{position:static}}
+#cv{max-width:100%;max-height:72vh;width:auto;height:auto;border-radius:12px;box-shadow:0 8px 28px #0003;touch-action:none;cursor:grab;background:#fff}
+.panel details{background:var(--cd);border:2px solid var(--pk);border-radius:20px;padding:10px 14px;margin-bottom:10px}summary{cursor:pointer;font-weight:700;font-size:18px}
+.vw{position:relative;max-width:100%}video{width:100%;border-radius:16px;background:#000;max-height:300px}
+#cd{position:absolute;inset:0;display:grid;place-items:center;font:120px Pacifico,cursive;color:#fff;text-shadow:0 0 20px #e8466f}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;max-height:none}.panel .fg{max-height:340px;overflow:auto}
+.fi{position:relative;background:var(--cd);border:2px solid var(--pk);border-radius:14px;padding:6px;text-align:center;cursor:pointer;transition:.2s;font-size:12px}.fi:hover,.fi.on{transform:scale(1.05);border-color:var(--p2)}.fi canvas{width:100%;height:auto;border-radius:6px}
+.hb{position:absolute;top:2px;right:2px;padding:0 7px;border:0;background:#fffc;color:#e8466f}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.card{background:var(--cd);border:2px solid var(--pk);border-radius:20px;padding:14px}.card img{width:100%;border-radius:10px}
+.sk{font-size:28px;padding:2px 8px}.hint,small{color:var(--mu)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--dk);color:var(--bg);padding:10px 18px;border-radius:99px;z-index:20;max-width:90vw}
+</style></head><body>
+<header><a class="logo" href="#home"><svg width="38" height="38" viewBox="0 0 40 40"><rect x="3" y="10" width="34" height="24" rx="7" fill="#3b2a35"/><rect x="13" y="6" width="14" height="7" rx="3" fill="#3b2a35"/><circle cx="20" cy="22" r="9" fill="#ffc2d4"/><path d="M20 28c-6-4-7-8-4-10 2-1 3 0 4 1 1-1 2-2 4-1 3 2 2 6-4 10z" fill="#e8466f"/></svg>LDR PhotoBooth</a>
+<nav><a href="#home">Home</a><a href="#booth">PhotoBooth</a><a href="#gallery">Frames</a><a href="#ldr">LDR Corner</a><a href="#memories">Our Memories</a><a href="#about">About</a><a href="#help">Help</a></nav></header>
+<main>
+<section id="home" data-p><div class="hero"><span class="fl" style="left:6%;top:18%">☁️</span><span class="fl" style="left:88%;top:12%;animation-delay:1s">💖</span><span class="fl" style="left:14%;top:72%;animation-delay:2s">⭐</span><span class="fl" style="left:80%;top:70%;animation-delay:3s">✈️</span><span class="fl" style="left:48%;top:6%;animation-delay:4s">💌</span>
+<h1>LDR PhotoBooth</h1><p class="hand" style="font-size:26px">Capture Moments, Closer Even from Afar.</p><p>Snap photos, pick from 120 hand-built frames, add stickers, and keep your memories together — even when you’re miles apart.</p><a class="btn big" href="#booth">📸 Start Photobooth</a></div>
+<h2>Featured frames</h2><div class="fg" id="feat"></div><h2>Popular categories</h2><div class="chips" id="cats"></div></section>
+
+<section id="booth" data-p hidden><div class="booth"><div class="stage"><canvas id="cv"></canvas>
+<div class="row" style="justify-content:center"><button id="undo">↩ Undo</button><button id="redo">↪ Redo</button><button id="reset">Reset</button><button id="del">🗑 Remove sticker</button></div>
+<div class="row" style="justify-content:center"><label>Size/zoom <input type="range" id="sz" min=".5" max="4" step=".01" value="1"></label><label>Rotate <input type="range" id="rot" min="-180" max="180" value="0"></label></div>
+<div class="row" style="justify-content:center"><button id="retake">Retake slot</button><button id="mvl">◀ Earlier</button><button id="mvr">Later ▶</button></div>
+<p class="hint">Tap a photo or sticker, drag to move, use the sliders or mouse wheel to zoom and rotate.</p></div>
+<div class="panel">
+<details open><summary>📸 Photos</summary>
+<div class="row"><select id="lay"><option value="single">Single photo</option><option value="duo">2-photo layout</option><option value="trio">3-photo layout</option><option value="quad">4-photo grid</option><option value="strip">Classic photobooth strip</option><option value="split">Split / side-by-side (LDR)</option></select></div>
+<div class="row"><button id="cam">🎥 Start camera</button><button id="flip">🔄 Front/back</button><select id="timer"><option>3</option><option>5</option><option>10</option></select>s</div>
+<div id="camBox" hidden><div class="vw"><video id="vid" playsinline muted></video><div id="cd" hidden></div></div><div class="row"><button id="snap">📷 Snap</button><button id="auto">✨ Auto-shoot all slots</button></div></div>
+<div class="row"><label class="btn">🖼 Upload photos<input id="up" type="file" accept="image/*" multiple hidden></label></div>
+<label class="row"><input type="checkbox" id="sess"> Virtual session: take turns <b id="turnlab"></b></label></details>
+<details><summary>🖼 Frames (120)</summary><div id="bb"></div></details>
+<details><summary>💌 Names, captions &amp; dates</summary>
+<div class="row"><input id="n1" placeholder="Partner A nickname"><input id="n2" placeholder="Partner B nickname"></div>
+<div class="row"><input id="cap" placeholder="Caption (blank = frame’s own)" style="width:100%"></div>
+<div class="row"><input id="msg" placeholder="Custom message" style="width:100%"></div>
+<div class="row"><input id="lab" placeholder="Label e.g. 8,400 km apart"><input id="dt" type="date"></div>
+<div class="row"><label>Frame color <input type="color" id="col" value="#e8466f"></label><label>Background <input type="color" id="bgc" value="#ffe3ea"></label><button id="cx">↺ Auto colors</button></div>
+<div class="row"><label>Matching version <select id="pair"><option value="0">Partner A</option><option value="1">Partner B</option></select></label></div>
+<div class="row"><label class="btn">⬆ Upload transparent PNG frame<input id="ovf" type="file" accept="image/png" hidden></label><button id="ovx">Remove</button></div></details>
+<details><summary>🎀 Stickers &amp; text</summary><div class="row" id="emo"></div>
+<div class="row"><input id="tt" placeholder="Text sticker"><select id="tf"><option value="Pacifico,cursive">Pacifico</option><option value="'Patrick Hand',cursive">Handwritten</option><option value="Quicksand,sans-serif">Rounded</option><option value="Georgia,serif">Serif</option><option value="monospace">Mono</option></select><input type="color" id="tc" value="#e8466f"><input type="number" id="ts" value="56" min="16" max="200" style="width:70px"><button id="tadd">Add text</button></div>
+<div class="row"><label class="btn">⬆ Upload PNG sticker<input id="upk" type="file" accept="image/*" hidden></label></div></details>
+<details open><summary>⬇ Save &amp; share</summary>
+<div class="row"><select id="fmt"><option value="png">PNG (best)</option><option value="jpeg">JPEG</option></select><button id="dl" class="big" style="padding:10px 22px">Download</button></div>
+<div class="row"><input id="mt" placeholder="Photo title"><button id="sv">💾 Save to Our Memories</button><button id="sh">🔗 Share</button></div>
+<small>No watermarks. Saved memories stay private on this device.</small></details>
+</div></div></section>
+
+<section id="gallery" data-p hidden><h2>Frame Gallery</h2><div id="gb"></div></section>
+
+<section id="ldr" data-p hidden><h2>LDR Corner 💌</h2><p>Made for two people in two places. Pick a caption, then jump into the booth.</p>
+<div class="chips" id="caps"></div>
+<div class="cards" style="margin:16px 0"><div class="card"><h3>Split layout</h3><p>Each partner places their own photo side by side.</p><button id="gs">Open split booth</button></div>
+<div class="card"><h3>Turn-taking session</h3><p>Pass the camera: you and your partner take turns filling a shared strip. Photos get name tags.</p><button id="gt">Start session</button></div>
+<div class="card"><h3>Matching frames</h3><p>Both of you use the same frame — one picks “Partner A”, the other “Partner B” (colors swap). Send each other your halves and combine in a split layout.</p><button id="gm">Go to booth</button></div></div>
+<h3>Distance &amp; matching frames</h3><div id="lb"></div></section>
+
+<section id="memories" data-p hidden><h2>Our Memories</h2><p class="hint">🔒 Guest mode: everything below is stored only in this browser. Nothing is public.</p><div class="cards" id="ml"></div></section>
+
+<section id="about" data-p hidden><h2>About</h2><p>LDR PhotoBooth helps long-distance couples, friends and family make shared photo strips and keepsakes. Everything runs in your browser: photos never leave your device unless you share them yourself.</p>
+<h3>Hosting &amp; backend</h3><p>This is a static site: drop it on Netlify or Vercel for free. Cloud galleries, accounts and shareable links need a backend (for example Supabase: auth + Postgres + storage with row-level security, or Firebase). Those services have free tiers with storage and bandwidth limits — check current limits before launch. Real-time remote sessions would additionally need WebRTC or a realtime channel.</p></section>
+
+<section id="help" data-p hidden><h2>Help</h2><h3>Camera</h3><p>Press “Start camera” and allow access when your browser asks. If you blocked it, click the lock icon in the address bar and allow the camera, or use Upload. Camera needs HTTPS.</p>
+<h3>Upload</h3><p>Choose photos from your gallery (images up to 20 MB). They fill empty slots in order.</p>
+<h3>Edit</h3><p>Tap a photo or sticker to select it, drag to move, use the sliders to zoom and rotate. “Retake slot” clears the selected photo; Earlier/Later reorders.</p>
+<h3>Download &amp; share</h3><p>Choose PNG or JPEG and Download. “Share” uses your device’s share sheet. “Save” keeps it in Our Memories on this device.</p></section>
+</main><div id="toast" hidden></div>
+<script>
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
+const LS=(k,d)=>{try{return JSON.parse(localStorage.getItem('ldr_'+k))??d}catch(e){return d}},SS=(k,v)=>{try{localStorage.setItem('ldr_'+k,JSON.stringify(v));return 1}catch(e){return 0}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const wait=t=>new Promise(r=>setTimeout(r,t));
+let tT;const toast=m=>{const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,4000)};
+const C=[
+['Love & Couple','#ffe3ea','#e8466f','#ff9db5','💖💕💘💞','Us, always|My person|Love you most|Better together|Two hearts, one story|Forever yours'],
+['Long Distance (LDR)','#e6f0ff','#4a6fd8','#ff9db5','✈️💌🗺️⭐','Miles apart, hearts together|I miss you|Until we meet again|You are my favorite person|Same sky, same stars|Counting days to you'],
+['Cute & Kawaii','#fff0f7','#ff5fa2','#b9a6ff','🧸🐰🍓☁️','Kawaii club|So fluffy|Cutie patootie|Sparkle time|Bunny hugs|Strawberry smiles'],
+['Pink & Pastel','#ffe0ec','#f06292','#ffc2d4','🌸🎀💗✨','Pink vibes|Cotton candy|Rosy day|Blush mood|Pastel dreams|Sweet as peach'],
+['Minimalist','#fafafa','#222222','#999999','◦·+','Simple|Just us|Us.|Less is more|Quiet moments|Together'],
+['Retro & Vintage','#f6e7c8','#a0522d','#d98c4a','☀️🌼📻🎞️','Good old days|Retro love|Vintage us|Groovy|Remember when|Classic duo'],
+['Film Camera','#222222','#f5d76e','#ffffff','🎞️📷','Roll 01|Kodak moment|35mm memories|Developed with love|Frame by frame|Exposure: us'],
+['Polaroid','#fffdf8','#555555','#e8a0b4','📌🌿','Polaroid day|Snap!|Instant us|Shake it|Memory print|Dear moment'],
+['Anime & Cartoon','#e8f6ff','#ff6b9d','#5ec8ff','💥⚡🌟💫','Episode 01|Main characters|Plot twist: love|Power duo|Sparkle!|Best arc ever'],
+['Birthday','#fff3d6','#ff8a3d','#ff6fb1','🎂🎈🎉🎁','Happy birthday!|Another year cuter|Make a wish|Party time|Cake o’clock|Birthday bestie'],
+['Anniversary','#fbe9f0','#b5365f','#e0a96d','🥂💍🌹💝','Happy anniversary|Another year of us|Still choosing you|Our day|Cheers to us|Years of love'],
+['Valentine’s Day','#ffd9e2','#d81b60','#ff80ab','💌🌹💘😘','Be mine|Cupid’s pick|Roses & you|Valentine me|XOXO|Love letter'],
+['Christmas & Seasonal','#e8f5e9','#c62828','#2e7d32','🎄⛄❄️🎅','Merry & bright|Cozy winter|Snow much love|Jingle all the way|Santa’s list|Warm wishes'],
+['Friendship','#fff6d8','#f9a825','#4fc3f7','🌈👯🤝⭐','Besties|Squad goals|Friends forever|Partners in crime|Ride or die|Soul sisters'],
+['Funny & Meme','#fff9c4','#ff5722','#7e57c2','😂💀🤡🔥','No thoughts, just us|Certified chaos|Cringe but cute|Mood.|We tried|Send help'],
+['K-Pop Inspired','#f1e6ff','#8e44ff','#ff4fa0','💜🎤✨🪩','Comeback era|Bias wrecker|Fan meeting|Stage lights|Photocard mood|Encore!'],
+['Black & White','#ffffff','#111111','#777777','▪▫✦','Monochrome|Noir love|Classic|Timeless|Ink & light|Black tie'],
+['Aesthetic Scrapbook','#f3e5d0','#7b5e3b','#e07a8c','📎🌿✂️🖍️','Memory lane|Scrap it|Little notes|Pressed flowers|Journal day|Taped in'],
+['Matching Couple','#ffe8f0','#e91e63','#3f8cff','🧩💑🔗','Puzzle piece|Perfect match|Half of whole|Linked hearts|Mirror me|Two of a kind'],
+['Custom Style','#f0eaff','#7c4dff','#ffb74d','🖼️🎨✏️','Make it yours|Draw your own|Your style|DIY frame|Blank canvas|My design']];
+const F=[];C.forEach((c,ci)=>c[5].split('|').forEach((cap,v)=>{const dk=ci==6||(v==4&&ci%3==0)?1:0;F.push({id:F.length,cat:ci,cap,bg:dk?(ci==6?c[1]:'#2b2030'):c[1],a:dk&&ci!=6?c[3]:c[2],b:c[3],e:c[4].match(/\p{Extended_Pictographic}\uFE0F?|./gu),pat:(v+ci)%6,bd:(ci*3+v*5)%8,dk})}));
+const L={single:[600,760,[[36,36,528,540]]],duo:[600,1100,[[36,36,528,460],[36,508,528,460]]],trio:[600,1400,[0,1,2].map(i=>[36,36+i*388,528,376])],quad:[600,800,[[36,36,258,258],[306,36,258,258],[36,306,258,258],[306,306,258,258]]],strip:[360,1360,[0,1,2,3].map(i=>[36,24+i*276,288,264])],split:[1100,660,[[36,36,500,470],[564,36,500,470]]]};
+const blank=()=>({im:-1,ox:0,oy:0,z:1,r:0});
+const newSt=()=>({layout:'single',f:0,slots:[blank()],stk:[],names:['',''],cap:'',msg:'',date:'',label:'',pair:0,col:'',bgc:'',ov:-1,sess:0,turn:0});
+let st=newSt(),imgs=[],sel=null,hist=[],redo=[],drag=null;
+const mx=document.createElement('canvas').getContext('2d');
+function sbox(k){if(k.t=='i'){const m=imgs[k.im];return[k.s,k.s*m.height/m.width]}mx.font=k.t=='e'?`${k.s}px serif`:`${k.s}px ${k.f}`;return[mx.measureText(k.v).width,k.s*1.2]}
+function render(x,s,sc,ui){
+ const[W,H,S]=L[s.layout],f=F[s.f],dk=f.dk;let a=s.col||f.a,b=f.b;if(+s.pair)[a,b]=[b,a];
+ const bg=s.bgc||f.bg,tx=dk?'#fff7ee':a,ink=dk?'#fff7ee':'#3b2a35';
+ x.setTransform(sc,0,0,sc,0,0);x.clearRect(0,0,W,H);x.fillStyle=bg;x.fillRect(0,0,W,H);x.textAlign='center';x.textBaseline='middle';
+ x.save();x.globalAlpha=.14;x.fillStyle=x.strokeStyle=dk?'#fff':a;const p=f.pat;
+ if(p==1)for(let i=0;i<W;i+=40)for(let j=0;j<H;j+=40){x.beginPath();x.arc(i+20,j+20,4,0,7);x.fill()}
+ if(p==2){x.lineWidth=10;for(let i=-H;i<W;i+=36){x.beginPath();x.moveTo(i,0);x.lineTo(i+H,H);x.stroke()}}
+ if(p==3)for(let i=0;i*40<W;i++)for(let j=0;j*40<H;j++)if((i+j)%2)x.fillRect(i*40,j*40,40,40);
+ if(p==4){for(let i=0;i<W;i+=40)x.fillRect(i,0,2,H);for(let j=0;j<H;j+=40)x.fillRect(0,j,W,2)}
+ if(p==5){x.font='34px serif';for(let i=0;i*90<W+90;i++)for(let j=0;j*90<H+90;j++)x.fillText(f.e[(i+j)%f.e.length],i*90+(j%2)*45,j*90)}
+ x.restore();
+ S.forEach((r,i)=>{const[rx,ry,rw,rh]=r,sl=s.slots[i]||blank(),im=imgs[sl.im];x.save();x.beginPath();x.rect(rx,ry,rw,rh);x.clip();
+  if(im){const k=Math.max(rw/im.width,rh/im.height)*sl.z;x.translate(rx+rw/2+sl.ox,ry+rh/2+sl.oy);x.rotate(sl.r*Math.PI/180);x.drawImage(im,-im.width*k/2,-im.height*k/2,im.width*k,im.height*k)}
+  else{x.fillStyle=dk?'#ffffff22':'#ffffff99';x.fillRect(rx,ry,rw,rh);x.fillStyle=b;x.globalAlpha=.7;x.font=Math.min(rw,rh)/4+'px serif';x.fillText('📷',rx+rw/2,ry+rh/2)}
+  x.restore();
+  if(s.sess&&im&&sl.by!=null){const t=s.names[sl.by]||(sl.by?'Partner B':'Partner A');x.font='700 22px Quicksand,sans-serif';const w=x.measureText(t).width+22;x.fillStyle=a;x.fillRect(rx+8,ry+rh-38,w,28);x.fillStyle='#fff';x.fillText(t,rx+8+w/2,ry+rh-24)}
+  if(ui&&sel&&sel.t=='p'&&sel.i==i){x.save();x.strokeStyle='#ff3d7f';x.lineWidth=4;x.setLineDash([12,8]);x.strokeRect(rx+2,ry+2,rw-4,rh-4);x.restore()}});
+ const ring=(inset,step,fn)=>{const w=W-2*inset,h=H-2*inset,P=2*(w+h);for(let t=0;t<P;t+=step){let u=t,px,py;if(u<w){px=inset+u;py=inset}else if((u-=w)<h){px=W-inset;py=inset+u}else if((u-=h)<w){px=W-inset-u;py=H-inset}else{u-=w;px=inset;py=H-inset-u}fn(px,py,t)}};
+ x.save();x.strokeStyle=x.fillStyle=a;const bd=f.bd;
+ if(bd==0){x.lineWidth=20;x.strokeRect(10,10,W-20,H-20)}
+ if(bd==1){x.lineWidth=4;x.strokeRect(6,6,W-12,H-12);x.strokeStyle=b;x.lineWidth=6;x.strokeRect(18,18,W-36,H-36)}
+ if(bd==2){x.lineWidth=10;x.setLineDash([22,14]);x.strokeRect(16,16,W-32,H-32)}
+ if(bd==3){x.fillStyle=b;ring(14,30,(px,py)=>{x.beginPath();x.arc(px,py,13,0,7);x.fill()});x.fillStyle=a;ring(14,60,(px,py)=>{x.beginPath();x.arc(px,py,6,0,7);x.fill()})}
+ if(bd==4){x.fillStyle='#111';x.fillRect(0,0,30,H);x.fillRect(W-30,0,30,H);x.fillStyle=dk?'#f5d76e':'#fff';for(let j=14;j<H;j+=44){x.fillRect(8,j,14,20);x.fillRect(W-22,j,14,20)}}
+ if(bd==5){x.strokeStyle='#fff';x.lineWidth=32;x.strokeRect(16,16,W-32,H-32);x.strokeStyle=b;x.lineWidth=2;x.strokeRect(32,32,W-64,H-64)}
+ if(bd==6)ring(18,22,(px,py)=>{x.beginPath();x.arc(px,py,5,0,7);x.fill()});
+ if(bd==7){x.lineWidth=12;x.strokeStyle=b;x.strokeRect(6,6,W-12,H-12);[[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(([px,py,u,v])=>{x.beginPath();x.moveTo(px,py);x.lineTo(px+u*60,py);x.lineTo(px,py+v*60);x.fill()})}
+ x.restore();
+ let q=f.id*9301+49297;const R=()=>(q=(q*9301+49297)%233280)/233280,step=2*(W+H-72)/12;
+ ring(18,step,(px,py,t)=>{x.save();x.translate(px,py);x.rotate(R()-.5);x.font=(24+R()*14)+'px serif';x.fillText(f.e[Math.round(t/step)%f.e.length],0,0);x.restore()});
+ const zy=Math.max(...S.map(r=>r[1]+r[3]))+14,zh=H-zy-20,wmax=W-2*Math.min(110,W*.2);
+ x.font=Math.min(60,W*.08)+'px serif';x.fillText(f.e[0],W*.1,zy+zh/2);x.fillText(f.e[1%f.e.length],W*.9,zy+zh/2);
+ const cap=s.cap||f.cap;let fs=Math.min(W*.09,60);x.font=`${fs}px Pacifico,cursive`;while(x.measureText(cap).width>wmax&&fs>14){fs-=2;x.font=`${fs}px Pacifico,cursive`}
+ const nm=s.names[0]||s.names[1]?`${s.names[0]||'…'} ♥ ${s.names[1]||'…'}`:'',dl=[s.label,s.date].filter(Boolean).join(' · ');
+ const ln=[[cap,`${fs}px Pacifico,cursive`,tx],[nm,`700 ${fs*.55}px Quicksand,sans-serif`,ink],[dl,`${fs*.5}px "Patrick Hand",cursive`,ink],[s.msg,`${fs*.5}px "Patrick Hand",cursive`,ink]].filter(l=>l[0]),lh=zh/(ln.length+1);
+ ln.forEach((l,i)=>{x.font=l[1];x.fillStyle=l[2];x.fillText(l[0],W/2,zy+lh*(i+1),wmax)});
+ s.stk.forEach((k,i)=>{x.save();x.translate(k.x,k.y);x.rotate(k.r*Math.PI/180);if(k.t=='i'){const m=imgs[k.im],h=k.s*m.height/m.width;x.drawImage(m,-k.s/2,-h/2,k.s,h)}else{x.font=k.t=='e'?`${k.s}px serif`:`${k.s}px ${k.f}`;x.fillStyle=k.c||'#000';x.fillText(k.v,0,0)}
+  if(ui&&sel&&sel.t=='s'&&sel.i==i){const[w,h]=sbox(k);x.strokeStyle='#ff3d7f';x.lineWidth=3;x.setLineDash([8,6]);x.strokeRect(-w/2-6,-h/2-6,w+12,h+12)}x.restore()});
+ if(s.ov>=0&&imgs[s.ov])x.drawImage(imgs[s.ov],0,0,W,H);
+}
+const cv=$('#cv');
+function draw(){const[W,H]=L[st.layout],sc=Math.min(1.5,900/W);cv.width=W*sc;cv.height=H*sc;render(cv.getContext('2d'),st,sc,1)}
+function thumb(id){const c=document.createElement('canvas');c.width=100;c.height=127;render(c.getContext('2d'),{...newSt(),f:id},1/6,0);return c}
+const push=()=>{hist.push(JSON.stringify(st));if(hist.length>60)hist.shift();redo=[]};
+function sync(){$('#n1').value=st.names[0];$('#n2').value=st.names[1];$('#cap').value=st.cap;$('#msg').value=st.msg;$('#dt').value=st.date;$('#lab').value=st.label;$('#lay').value=st.layout;$('#pair').value=st.pair;$('#sess').checked=!!st.sess;turnlab()}
+function turnlab(){$('#turnlab').textContent=st.sess?'— next: '+(st.names[st.turn]||(st.turn?'Partner B':'Partner A')):''}
+function setLayout(k){st.layout=k;const n=L[k][2].length;while(st.slots.length<n)st.slots.push(blank());st.slots.length=n;sel=null;$('#lay').value=k;draw()}
+function setFrame(id){push();st.f=id;SS('rec',[id,...LS('rec',[]).filter(i=>i!=id)].slice(0,24));draw();B.bb&&B.bb.rd()}
+function undo(){if(!hist.length)return;redo.push(JSON.stringify(st));st=JSON.parse(hist.pop());sel=null;sync();draw()}
+$('#undo').onclick=undo;$('#redo').onclick=()=>{if(!redo.length)return;hist.push(JSON.stringify(st));st=JSON.parse(redo.pop());sel=null;sync();draw()};
+$('#reset').onclick=()=>{if(confirm('Reset everything in the editor?')){push();st=newSt();sel=null;sync();draw()}};
+$('#lay').onchange=e=>{push();setLayout(e.target.value)};
+[['n1',v=>st.names[0]=v],['n2',v=>st.names[1]=v],['cap',v=>st.cap=v],['msg',v=>st.msg=v],['dt',v=>st.date=v],['lab',v=>st.label=v],['col',v=>st.col=v],['bgc',v=>st.bgc=v],['pair',v=>st.pair=+v]].forEach(([id,fn])=>{const e=$('#'+id);e.onfocus=e.onpointerdown=push;e.oninput=()=>{fn(e.value);turnlab();draw()}});
+$('#cx').onclick=()=>{push();st.col=st.bgc='';draw()};
+$('#sess').onchange=e=>{push();st.sess=e.target.checked?1:0;st.turn=0;turnlab();draw()};
+const cur=()=>sel&&(sel.t=='p'?st.slots[sel.i]:st.stk[sel.i]);
+function syncSel(){const z=$('#sz'),r=$('#rot'),o=cur();if(!o)return;if(sel.t=='p'){z.min=.5;z.max=4;z.step=.01;z.value=o.z}else{z.min=16;z.max=500;z.step=1;z.value=o.s}r.value=o.r}
+$('#sz').onpointerdown=$('#rot').onpointerdown=push;
+$('#sz').oninput=e=>{const o=cur();if(!o)return;o[sel.t=='p'?'z':'s']=+e.target.value;draw()};
+$('#rot').oninput=e=>{const o=cur();if(!o)return;o.r=+e.target.value;draw()};
+$('#del').onclick=()=>{if(sel&&sel.t=='s'){push();st.stk.splice(sel.i,1);sel=null;draw()}else toast('Select a sticker first.')};
+$('#retake').onclick=()=>{if(sel&&sel.t=='p'){push();st.slots[sel.i]=blank();draw();toast('Slot cleared — snap or upload to refill.')}else toast('Tap a photo slot first.')};
+const mv=d=>{if(!sel||sel.t!='p')return toast('Tap a photo slot first.');const j=sel.i+d;if(j<0||j>=st.slots.length)return;push();[st.slots[sel.i],st.slots[j]]=[st.slots[j],st.slots[sel.i]];sel.i=j;draw()};
+$('#mvl').onclick=()=>mv(-1);$('#mvr').onclick=()=>mv(1);
+const pt=e=>{const r=cv.getBoundingClientRect(),[W,H]=L[st.layout];return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}};
+function hit(p){for(let i=st.stk.length-1;i>=0;i--){const k=st.stk[i],a=-k.r*Math.PI/180,dx=p.x-k.x,dy=p.y-k.y,ux=dx*Math.cos(a)-dy*Math.sin(a),uy=dx*Math.sin(a)+dy*Math.cos(a),[w,h]=sbox(k);if(Math.abs(ux)<w/2+8&&Math.abs(uy)<h/2+8)return{t:'s',i}}
+ const S=L[st.layout][2];for(let i=S.length-1;i>=0;i--){const[x,y,w,h]=S[i];if(p.x>=x&&p.x<=x+w&&p.y>=y&&p.y<=y+h)return{t:'p',i}}return null}
+cv.onpointerdown=e=>{const p=pt(e);sel=hit(p);const o=cur();if(o){push();cv.setPointerCapture(e.pointerId);drag=sel.t=='p'?{p,a:o.ox,b:o.oy}:{p,a:o.x,b:o.y};syncSel()}draw()};
+cv.onpointermove=e=>{if(!drag||!sel)return;const p=pt(e),o=cur(),dx=p.x-drag.p.x,dy=p.y-drag.p.y;if(sel.t=='p'){o.ox=drag.a+dx;o.oy=drag.b+dy}else{o.x=drag.a+dx;o.y=drag.b+dy}draw()};
+cv.onpointerup=cv.onpointercancel=()=>drag=null;
+cv.onwheel=e=>{const o=cur();if(!o)return;e.preventDefault();const f=e.deltaY<0?1.05:.95;if(sel.t=='p')o.z=Math.min(4,Math.max(.5,o.z*f));else o.s=Math.min(500,Math.max(16,o.s*f));syncSel();draw()};
+// camera
+let stream,facing='user',busy=0;const vid=$('#vid');
+async function startCam(){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return toast('Camera isn’t supported on this device or connection (needs HTTPS). Try Upload instead.');
+ try{stream&&stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:960}},audio:false});vid.srcObject=stream;await vid.play();vid.style.transform=facing=='user'?'scaleX(-1)':'none';$('#camBox').hidden=false}
+ catch(e){toast(e.name=='NotAllowedError'?'Camera permission denied. Allow it in your browser settings, or upload photos instead.':e.name=='NotFoundError'?'No camera found. Try Upload instead.':'Couldn’t open the camera: '+e.message)}}
+$('#cam').onclick=startCam;$('#flip').onclick=()=>{facing=facing=='user'?'environment':'user';stream?startCam():toast('Start the camera first.')};
+function grab(){const c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;const x=c.getContext('2d');if(facing=='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(vid,0,0);return c}
+function nextSlot(){if(sel&&sel.t=='p'&&st.slots[sel.i].im<0)return sel.i;const i=st.slots.findIndex(s=>s.im<0);return i>=0?i:sel&&sel.t=='p'?sel.i:0}
+function place(c,i){push();imgs.push(c);const o=blank();o.im=imgs.length-1;if(st.sess){o.by=st.turn;st.turn^=1;turnlab()}st.slots[i]=o;sel={t:'p',i};syncSel();draw()}
+async function shoot(i){const cd=$('#cd');for(let k=+$('#timer').value;k>0;k--){cd.textContent=k;cd.hidden=false;await wait(1000)}cd.textContent='📸';await wait(250);cd.hidden=true;place(grab(),i)}
+$('#snap').onclick=async()=>{if(busy||!stream)return;busy=1;await shoot(nextSlot());busy=0};
+$('#auto').onclick=async()=>{if(busy||!stream)return;busy=1;for(let i=0;i<st.slots.length;i++){await shoot(i);await wait(500)}busy=0};
+function load(f,max){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};im.onerror=()=>no();im.src=u})}
+async function files(list,cb){for(const f of list){if(!f.type.startsWith('image/')||f.size>20e6){toast(`“${f.name}” isn’t a supported image (max 20 MB).`);continue}try{cb(await load(f,1600))}catch(e){toast('Couldn’t read '+f.name+'.')}}}
+$('#up').onchange=async e=>{await files(e.target.files,c=>place(c,nextSlot()));e.target.value=''};
+$('#upk').onchange=async e=>{await files(e.target.files,c=>{push();imgs.push(c);const[W,H]=L[st.layout];st.stk.push({t:'i',im:imgs.length-1,x:W/2,y:H/2,s:200,r:0});sel={t:'s',i:st.stk.length-1};syncSel();draw()});e.target.value=''};
+$('#ovf').onchange=async e=>{await files(e.target.files,c=>{push();imgs.push(c);st.ov=imgs.length-1;draw()});e.target.value=''};
+$('#ovx').onclick=()=>{push();st.ov=-1;draw()};
+'💖🌸⭐🎀🧸🐰🐱🌙☁️✈️💌🗺️🍓✨🦋🌈🌹💕'.match(/\p{Extended_Pictographic}\uFE0F?/gu).forEach(e=>{const b=document.createElement('button');b.className='sk';b.textContent=e;b.onclick=()=>{push();const[W,H]=L[st.layout];st.stk.push({t:'e',v:e,x:W/2+(Math.random()-.5)*120,y:H/2+(Math.random()-.5)*120,s:72,r:0});sel={t:'s',i:st.stk.length-1};syncSel();draw()};$('#emo').append(b)});
+$('#tadd').onclick=()=>{const v=$('#tt').value.trim();if(!v)return toast('Type some text first.');push();const[W,H]=L[st.layout];st.stk.push({t:'t',v,f:$('#tf').value,c:$('#tc').value,x:W/2,y:H/2,s:+$('#ts').value||56,r:0});sel={t:'s',i:st.stk.length-1};syncSel();draw()};
+// export
+function out(sc,type,q){const c=document.createElement('canvas'),[W,H]=L[st.layout];c.width=W*sc;c.height=H*sc;render(c.getContext('2d'),st,sc,0);return new Promise(r=>c.toBlob(r,type,q))}
+const hq=()=>L[st.layout][0]<700?3:2;
+$('#dl').onclick=async()=>{const t=$('#fmt').value,b=await out(hq(),'image/'+t,.95);if(!b)return toast('Export failed — try a smaller layout.');const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`ldr-photobooth.${t=='png'?'png':'jpg'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
+$('#sv').onclick=async()=>{const b=await out(1,'image/jpeg',.75),u=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)}),m=LS('mem',[]);m.unshift({id:Date.now(),t:$('#mt').value||'Untitled memory',c:st.cap||F[st.f].cap,d:st.date||new Date().toLocaleDateString(),u});if(!SS('mem',m))return toast('Browser storage is full — delete old memories or download instead.');toast('Saved to Our Memories 💖')};
+$('#sh').onclick=async()=>{const b=await out(2,'image/png'),f=new File([b],'ldr-photobooth.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:$('#mt').value||'LDR PhotoBooth'})}catch(e){}}else toast('Sharing isn’t available here — download it and send it directly. Shareable links need a backend (see About).')};
+function mem(){const m=LS('mem',[]);$('#ml').innerHTML=m.length?m.map(o=>`<div class="card"><img src="${o.u}" alt=""><b>${esc(o.t)}</b><p>${esc(o.c)}</p><small>${esc(o.d)} · 🔒 Private on this device</small><div class="row"><a class="btn" download="${esc(o.t)}.jpg" href="${o.u}">Download</a><button data-d="${o.id}">Delete</button></div></div>`).join(''):'<p>No memories yet — make one in the PhotoBooth!</p>'}
+$('#ml').onclick=e=>{const d=e.target.dataset.d;if(d&&confirm('Delete this memory?')){SS('mem',LS('mem',[]).filter(o=>o.id!=d));mem()}};
+// frame browser
+function browser(root,pick,only){
+ root.innerHTML=`<div class="row"><input class="q" placeholder="Search frames…"><select class="cs"><option value="">All categories</option>${C.map((c,i)=>`<option value="${i}">${c[0]}</option>`).join('')}</select><select class="tb"><option value="all">All</option><option value="fav">♥ Favorites</option><option value="rec">Recent</option></select><button class="rnd">🎲 Random</button></div><div class="fg"></div><div class="row"><button class="more">Load more</button></div>`;
+ const g=$('.fg',root),q=$('.q',root),cs=$('.cs',root),tb=$('.tb',root);let n=24;
+ if(only)$$('option',cs).forEach(o=>{if(o.value!==''&&!only.includes(+o.value))o.remove()});
+ const list=()=>{const fv=LS('fav',[]),t=q.value.toLowerCase();let r=F.filter(f=>(!only||only.includes(f.cat))&&(cs.value===''||f.cat==cs.value)&&(f.cap+' '+C[f.cat][0]).toLowerCase().includes(t));if(tb.value=='fav')r=r.filter(f=>fv.includes(f.id));if(tb.value=='rec')r=LS('rec',[]).map(i=>F[i]).filter(f=>r.includes(f));return r};
+ const rd=()=>{const r=list(),fv=LS('fav',[]);g.innerHTML='';r.slice(0,n).forEach(f=>{const d=document.createElement('div');d.className='fi'+(st.f==f.id?' on':'');d.append(thumb(f.id));d.insertAdjacentHTML('beforeend',`<span>${esc(f.cap)}</span><button class="hb" title="Favorite">${fv.includes(f.id)?'♥':'♡'}</button>`);d.onclick=e=>{if(e.target.classList.contains('hb')){const a=LS('fav',[]),i=a.indexOf(f.id);i<0?a.push(f.id):a.splice(i,1);SS('fav',a);rd();return}pick(f.id)};g.append(d)});if(!r.length)g.textContent='No frames found.';$('.more',root).hidden=r.length<=n};
+ q.oninput=cs.onchange=tb.onchange=()=>{n=24;rd()};$('.more',root).onclick=()=>{n+=24;rd()};
+ $('.rnd',root).onclick=()=>{const r=list();if(r.length)pick(r[Math.floor(Math.random()*r.length)].id)};
+ rd();return{rd,cat(i){cs.value=i;n=24;rd()}}}
+const B={};
+const goBooth=id=>{setFrame(id);location.hash='booth'};
+B.bb=browser($('#bb'),setFrame);B.gal=browser($('#gb'),goBooth);B.ldr=browser($('#lb'),goBooth,[1,18]);
+$('#feat').append(...[0,13,26,32,42,51,60,66,78,90,100,110].map(i=>{const d=document.createElement('div');d.className='fi';d.append(thumb(i));d.insertAdjacentHTML('beforeend','<span>'+esc(F[i].cap)+'</span>');d.onclick=()=>goBooth(i);return d}));
+C.forEach((c,i)=>{const b=document.createElement('span');b.className='chip';b.textContent=c[4].slice(0,2).replace(/[^\p{Extended_Pictographic}]/gu,'')+' '+c[0];b.onclick=()=>{B.gal.cat(i);location.hash='gallery'};$('#cats').append(b)});
+C[1][5].split('|').concat(['Forever & a day','Long-distance, close at heart']).forEach(t=>{const b=document.createElement('span');b.className='chip';b.textContent='“'+t+'”';b.onclick=()=>{push();st.cap=t;sync();draw();location.hash='booth'};$('#caps').append(b)});
+$('#gs').onclick=()=>{push();setLayout('split');location.hash='booth'};
+$('#gt').onclick=()=>{push();st.sess=1;st.turn=0;setLayout('strip');sync();location.hash='booth';toast('Fill in both nicknames, then take turns snapping!')};
+$('#gm').onclick=()=>{B.ldr.cat(18);location.hash='booth'};
+function show(){const ids=['home','booth','gallery','ldr','memories','about','help'],p=location.hash.slice(1),id=ids.includes(p)?p:'home';$$('[data-p]').forEach(s=>s.hidden=s.id!=id);$$('nav a').forEach(a=>a.classList.toggle('on',a.hash=='#'+id));if(id=='booth')draw();if(id=='memories')mem();scrollTo(0,0)}
+addEventListener('hashchange',show);show();
+['20px Pacifico','20px "Patrick Hand"','700 20px Quicksand'].forEach(f=>document.fonts.load(f).then(()=>{draw();B.bb.rd();B.gal.rd()}));
+</script></body></html>
