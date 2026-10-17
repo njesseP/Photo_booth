@@ -85,7 +85,7 @@ input[type=color]{padding:0;width:40px;height:34px}input[type=range]{padding:0;a
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <section id="collab" data-p hidden><style>.cg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}@media(max-width:800px){.cg{grid-template-columns:1fr}}#cPrev{max-width:100%;background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/20px 20px;border-radius:12px}#cc{max-width:100%;max-height:70vh;border-radius:12px;box-shadow:0 8px 28px #0003}fieldset{border:0;padding:0;margin:0}.qr img{width:170px;height:170px;border-radius:12px;background:#fff;padding:6px}.code{font:700 20px monospace;word-break:break-all}</style>
 <h2>Live Camera Collab 💌</h2>
-<div id="cNo" class="card" hidden><b>Live rooms aren’t available in this view.</b><p>This feature relays encrypted messages through the claude.ai viewer’s room connection, so both partners must be signed in to claude.ai and have Contributor access to this page. Public-link visitors can’t connect. Nothing is simulated here.</p></div>
+<div id="cNo" class="card" hidden><b>Live rooms aren’t available in this view.</b><p>Couldn’t reach the connection service (PeerJS signaling) or this network blocks it. Check your connection and try again. Nothing is simulated here.</p></div>
 <div id="c0"><p>Each of you uses your own camera, in your own place, and we combine you into one picture. No gallery uploads needed.</p>
 <div class="row"><button class="big" id="cInv">Invite Your Partner 💌</button></div>
 <div class="row"><input id="cN1" placeholder="Your nickname"><input id="cN2" placeholder="Partner’s nickname"><label>Invite valid for <select id="cExp"><option value="15">15 min</option><option value="60" selected>1 hour</option><option value="1440">24 hours</option></select></label></div>
@@ -268,7 +268,7 @@ function show(){const ids=['home','booth','gallery','ldr','collab','memories','a
 addEventListener('hashchange',show);show();
 ['20px Pacifico','20px "Patrick Hand"','700 20px Quicksand'].forEach(f=>document.fonts.load(f).then(()=>{draw();B.bb.rd();B.gal.rd()}));
 // ---- Live collab (encrypted relay over the claude.ai room capability) ----
-const A32='0123456789ABCDEFGHJKMNPQRSTVWXYZ',BASE='https://claude.ai/artifact/8xvdE3TkqQpxzmGwEj87YS',K={mine:'a',nm:['','']},caps={a:null,b:null},cIdx=imgs.push(null)-1,$c=id=>document.getElementById(id);
+const A32='0123456789ABCDEFGHJKMNPQRSTVWXYZ',BASE=window.claude?'https://claude.ai/artifact/8xvdE3TkqQpxzmGwEj87YS':'https://photo-booth-ldr.vercel.app/',K={mine:'a',nm:['','']},caps={a:null,b:null},cIdx=imgs.push(null)-1,$c=id=>document.getElementById(id);
 let comp,cs,cstream,sent={},rx={};
 const b32=b=>{let s='',n=0,v=0;for(const x of b){v=(v<<8)|x;n+=8;while(n>=5){s+=A32[(v>>>(n-5))&31];n-=5}v&=(1<<n)-1}if(n)s+=A32[(v<<(5-n))&31];return s};
 const unb32=s=>{let n=0,v=0;const o=[];for(const c of s){const k=A32.indexOf(c);if(k<0)return null;v=(v<<5)|k;n+=5;if(n>=8){o.push((v>>>(n-8))&255);n-=8;v&=(1<<n)-1}}return o.length>=16?new Uint8Array(o.slice(0,16)):null};
@@ -282,7 +282,15 @@ const me=()=>(K.r.peers().find(p=>p.sameTab)||{}).peer,other=()=>K.mine=='a'?'b'
 const newComp=()=>({bg:0,sh:1,a:[.3,.96,1],b:[.7,.96,1],f:6,cap:'',lab:'',dt:'',stk:[],pen:'a'});
 const BG=[['#ffd6e3','#fff0f5'],['#d9e8ff','#ffe3ea'],['#2b1b3a','#5b2a5a'],['#ffe9c7','#ffc2d4'],['#e6dcff','#f3e5ff']];
 function setP(s){K.st=s;K.r&&K.r.presence({role:K.host?'host':'guest',st:s})}
-async function openRoom(){const R=window.claude&&await claude.use('room');if(!R){$c('cNo').hidden=false;return false}try{K.r=await R.join(K.rn)}catch(e){toast('Couldn’t open the room ('+(e.code||e.message)+'). Try again.');return false}
+const peerLib=()=>window.Peer?Promise.resolve({join:peerRoom}):new Promise(ok=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.onload=()=>ok({join:peerRoom});s.onerror=()=>ok(null);document.head.append(s)});
+function peerRoom(){return new Promise((ok,no)=>{const pr=new Peer(K.host?K.rn:undefined),cn=[],pres={},mine={};let H={m:[],p:[]},id;
+ const list=()=>[{peer:id,presence:mine,isMe:true,sameTab:true},...cn.map(c=>({peer:c.peer,presence:pres[c.peer]||{},isMe:false,sameTab:false}))];
+ const fire=(j,l,u)=>H.p.forEach(f=>f({peers:list(),joined:j||[],left:l||[],updated:u||[]})),bc=d=>cn.forEach(c=>c.send(d));
+ const room={emit:async(t,d)=>bc({k:'m',d}),on:(t,f)=>{H.m.push(f);return()=>{H.m=H.m.filter(x=>x!=f)}},onPeers:f=>{H.p.push(f);setTimeout(()=>f({peers:list(),joined:list(),left:[],updated:[]}));return()=>{H.p=H.p.filter(x=>x!=f)}},presence:async p=>{Object.assign(mine,p);bc({k:'p',p:mine});fire([],[],[list()[0]])},peers:list,onConnection:f=>{setTimeout(()=>f(true));return()=>{}},leave:async()=>{try{pr.destroy()}catch(e){}}};
+ const wire=c=>{cn.push(c);c.send({k:'p',p:mine});fire([{peer:c.peer,presence:{},isMe:false,sameTab:false}]);c.on('data',m=>{if(!m)return;if(m.k=='m')H.m.slice().forEach(f=>f({peer:c.peer,isMe:false,sameTab:false,data:m.d}));else if(m.k=='p'&&m.p&&typeof m.p=='object'){pres[c.peer]=m.p;fire([],[],[list().find(x=>x.peer==c.peer)])}});c.on('close',()=>{const e={peer:c.peer,presence:pres[c.peer]||{},isMe:false,sameTab:false},i=cn.indexOf(c);if(i>=0)cn.splice(i,1);delete pres[c.peer];fire([],[e])})};
+ pr.on('error',e=>no({code:e.type,message:e.message}));
+ pr.on('open',i=>{id=i;if(K.host){pr.on('connection',c=>c.on('open',()=>wire(c)));ok(room)}else{const c=pr.connect(K.rn,{reliable:true});c.on('open',()=>{wire(c);ok(room)});setTimeout(()=>no({code:'peer-unavailable'}),10000)}})})}
+async function openRoom(){let R=window.claude&&await claude.use('room');if(!R)R=await peerLib();if(!R){$c('cNo').hidden=false;return false}try{K.r=await R.join(K.rn)}catch(e){toast(e.code=='peer-unavailable'?'No host found: the code is invalid, the invitation has expired, or the host left.':'Couldn’t open the room ('+(e.code||e.message)+'). Try again.');return false}
  K.off=[K.r.on('m',onMsg),K.r.onPeers(peersChanged),K.r.onConnection(c=>{clearTimeout(K.dt);if(!c)K.dt=setTimeout(()=>$c('cDis').hidden=false,2000);else $c('cDis').hidden=true})];return true}
 function showLobby(){$c('c0').hidden=true;$c('c1').hidden=false;$c('cInvP').hidden=!K.host;refresh()}
 function refresh(){const on=K.host?!!K.partner:!!K.admitted;$c('cWork').hidden=!on;$c('cComp').hidden=!on;$c('cKick').hidden=!(K.host&&K.partner);$c('cInfo').textContent=on?'You’re connected 💗 Take your photo, send it, then edit together.':K.host?'Waiting for your partner to join…':'Knocking… waiting for the host to let you in 💌';if(on&&comp){syncCtl();cdraw()}}
