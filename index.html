@@ -1,351 +1,1000 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>LDR PhotoBooth</title>
-<link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Patrick+Hand&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#fff7ee;--cd:#fff;--pk:#ffc2d4;--p2:#ff7aa2;--dk:#3b2a35;--mu:#8a6f7d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#241a21;--cd:#33252e;--pk:#6b3347;--dk:#ffeef3;--mu:#d3aebc}}
-:root[data-theme=dark]{--bg:#241a21;--cd:#33252e;--pk:#6b3347;--dk:#ffeef3;--mu:#d3aebc}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-*{box-sizing:border-box}[hidden]{display:none!important}
-body{margin:0;font:500 16px Quicksand,sans-serif;background:var(--bg);color:var(--dk)}
-h1,h2,.hand{font-family:Pacifico,cursive;font-weight:400}
-header{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;padding:10px 18px;background:var(--cd);border-bottom:3px dashed var(--pk)}
-.logo{display:flex;align-items:center;gap:8px;font:22px Pacifico,cursive;color:var(--p2);text-decoration:none}
-nav{display:flex;flex-wrap:wrap;gap:4px}nav a{padding:6px 12px;border-radius:99px;color:var(--dk);text-decoration:none;font-weight:700;transition:.2s}nav a:hover,nav a.on{background:var(--pk);transform:translateY(-2px)}
-main{max-width:1200px;margin:auto;padding:18px}
-button,.btn,select,input,textarea{font:inherit;color:var(--dk)}
-button,.btn{background:var(--pk);border:2px solid var(--dk);border-radius:99px;padding:8px 16px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
-button:hover,.btn:hover{transform:translateY(-2px) rotate(-1deg);background:var(--p2);color:#fff}
-.big{font-size:20px;padding:14px 30px;background:var(--p2);color:#fff}
-input,select,textarea{background:var(--cd);border:2px solid var(--pk);border-radius:14px;padding:7px 10px;max-width:100%}
-input[type=color]{padding:0;width:40px;height:34px}input[type=range]{padding:0;accent-color:var(--p2)}
-.hero{text-align:center;padding:50px 10px;background:linear-gradient(#ffd6e3,#fff0f5);border-radius:32px;position:relative;overflow:hidden;color:#3b2a35}
-.hero h1{font-size:clamp(34px,7vw,64px);margin:0 0 6px;color:#e8466f}.hero p{font-size:20px}
-.fl{position:absolute;font-size:34px;animation:fl 6s ease-in-out infinite;opacity:.8}@keyframes fl{50%{transform:translateY(-22px) rotate(12deg)}}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}.chips{display:flex;flex-wrap:wrap;gap:8px}
-.chip{background:var(--cd);border:2px solid var(--pk);border-radius:99px;padding:6px 14px;cursor:pointer;font-weight:700}.chip:hover{background:var(--pk)}
-.booth{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:18px;align-items:start}@media(max-width:900px){.booth{grid-template-columns:1fr}}
-.stage{text-align:center;position:sticky;top:70px}@media(max-width:900px){.stage{position:static}}
-#cv{max-width:100%;max-height:72vh;width:auto;height:auto;border-radius:12px;box-shadow:0 8px 28px #0003;touch-action:none;cursor:grab;background:#fff}
-.panel details{background:var(--cd);border:2px solid var(--pk);border-radius:20px;padding:10px 14px;margin-bottom:10px}summary{cursor:pointer;font-weight:700;font-size:18px}
-.vw{position:relative;max-width:100%}video{width:100%;border-radius:16px;background:#000;max-height:300px}
-#cd{position:absolute;inset:0;display:grid;place-items:center;font:120px Pacifico,cursive;color:#fff;text-shadow:0 0 20px #e8466f}
-.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px;max-height:none}.panel .fg{max-height:340px;overflow:auto}
-.fi{position:relative;background:var(--cd);border:2px solid var(--pk);border-radius:14px;padding:6px;text-align:center;cursor:pointer;transition:.2s;font-size:12px}.fi:hover,.fi.on{transform:scale(1.05);border-color:var(--p2)}.fi canvas{width:100%;height:auto;border-radius:6px}
-.hb{position:absolute;top:2px;right:2px;padding:0 7px;border:0;background:#fffc;color:#e8466f}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}.card{background:var(--cd);border:2px solid var(--pk);border-radius:20px;padding:14px}.card img{width:100%;border-radius:10px}
-.sk{font-size:28px;padding:2px 8px}.hint,small{color:var(--mu)}
-#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--dk);color:var(--bg);padding:10px 18px;border-radius:99px;z-index:20;max-width:90vw}
-</style></head><body>
-<header><a class="logo" href="#home"><svg width="38" height="38" viewBox="0 0 40 40"><rect x="3" y="10" width="34" height="24" rx="7" fill="#3b2a35"/><rect x="13" y="6" width="14" height="7" rx="3" fill="#3b2a35"/><circle cx="20" cy="22" r="9" fill="#ffc2d4"/><path d="M20 28c-6-4-7-8-4-10 2-1 3 0 4 1 1-1 2-2 4-1 3 2 2 6-4 10z" fill="#e8466f"/></svg>LDR PhotoBooth</a>
-<nav><a href="#home">Home</a><a href="#booth">PhotoBooth</a><a href="#gallery">Frames</a><a href="#ldr">LDR Corner</a><a href="#collab">Live Collab</a><a href="#memories">Our Memories</a><a href="#about">About</a><a href="#help">Help</a></nav></header>
-<main>
-<section id="home" data-p><div class="hero"><span class="fl" style="left:6%;top:18%">☁️</span><span class="fl" style="left:88%;top:12%;animation-delay:1s">💖</span><span class="fl" style="left:14%;top:72%;animation-delay:2s">⭐</span><span class="fl" style="left:80%;top:70%;animation-delay:3s">✈️</span><span class="fl" style="left:48%;top:6%;animation-delay:4s">💌</span>
-<h1>LDR PhotoBooth</h1><p class="hand" style="font-size:26px">Capture Moments, Closer Even from Afar.</p><p>Snap photos, pick from 120 hand-built frames, add stickers, and keep your memories together — even when you’re miles apart.</p><a class="btn big" href="#booth">📸 Start Photobooth</a></div>
-<h2>Featured frames</h2><div class="fg" id="feat"></div><h2>Popular categories</h2><div class="chips" id="cats"></div></section>
+<!DOCTYPE html>
+<html lang="en">
 
-<section id="booth" data-p hidden><div class="booth"><div class="stage"><canvas id="cv"></canvas>
-<div class="row" style="justify-content:center"><button id="undo">↩ Undo</button><button id="redo">↪ Redo</button><button id="reset">Reset</button><button id="del">🗑 Remove sticker</button></div>
-<div class="row" style="justify-content:center"><label>Size/zoom <input type="range" id="sz" min=".5" max="4" step=".01" value="1"></label><label>Rotate <input type="range" id="rot" min="-180" max="180" value="0"></label></div>
-<div class="row" style="justify-content:center"><button id="retake">Retake slot</button><button id="mvl">◀ Earlier</button><button id="mvr">Later ▶</button></div>
-<p class="hint">Tap a photo or sticker, drag to move, use the sliders or mouse wheel to zoom and rotate.</p></div>
-<div class="panel">
-<details open><summary>📸 Photos</summary>
-<div class="row"><select id="lay"><option value="single">Single photo</option><option value="duo">2-photo layout</option><option value="trio">3-photo layout</option><option value="quad">4-photo grid</option><option value="strip">Classic photobooth strip</option><option value="split">Split / side-by-side (LDR)</option></select></div>
-<div class="row"><button id="cam">🎥 Start camera</button><button id="flip">🔄 Front/back</button><select id="timer"><option>3</option><option>5</option><option>10</option></select>s</div>
-<div id="camBox" hidden><div class="vw"><video id="vid" playsinline muted></video><div id="cd" hidden></div></div><div class="row"><button id="snap">📷 Snap</button><button id="auto">✨ Auto-shoot all slots</button></div></div>
-<div class="row"><label class="btn">🖼 Upload photos<input id="up" type="file" accept="image/*" multiple hidden></label></div>
-<label class="row"><input type="checkbox" id="sess"> Virtual session: take turns <b id="turnlab"></b></label></details>
-<details><summary>🖼 Frames (120)</summary><div id="bb"></div></details>
-<details><summary>💌 Names, captions &amp; dates</summary>
-<div class="row"><input id="n1" placeholder="Partner A nickname"><input id="n2" placeholder="Partner B nickname"></div>
-<div class="row"><input id="cap" placeholder="Caption (blank = frame’s own)" style="width:100%"></div>
-<div class="row"><input id="msg" placeholder="Custom message" style="width:100%"></div>
-<div class="row"><input id="lab" placeholder="Label e.g. 8,400 km apart"><input id="dt" type="date"></div>
-<div class="row"><label>Frame color <input type="color" id="col" value="#e8466f"></label><label>Background <input type="color" id="bgc" value="#ffe3ea"></label><button id="cx">↺ Auto colors</button></div>
-<div class="row"><label>Matching version <select id="pair"><option value="0">Partner A</option><option value="1">Partner B</option></select></label></div>
-<div class="row"><label class="btn">⬆ Upload transparent PNG frame<input id="ovf" type="file" accept="image/png" hidden></label><button id="ovx">Remove</button></div></details>
-<details><summary>🎀 Stickers &amp; text</summary><div class="row" id="emo"></div>
-<div class="row"><input id="tt" placeholder="Text sticker"><select id="tf"><option value="Pacifico,cursive">Pacifico</option><option value="'Patrick Hand',cursive">Handwritten</option><option value="Quicksand,sans-serif">Rounded</option><option value="Georgia,serif">Serif</option><option value="monospace">Mono</option></select><input type="color" id="tc" value="#e8466f"><input type="number" id="ts" value="56" min="16" max="200" style="width:70px"><button id="tadd">Add text</button></div>
-<div class="row"><label class="btn">⬆ Upload PNG sticker<input id="upk" type="file" accept="image/*" hidden></label></div></details>
-<details open><summary>⬇ Save &amp; share</summary>
-<div class="row"><select id="fmt"><option value="png">PNG (best)</option><option value="jpeg">JPEG</option></select><button id="dl" class="big" style="padding:10px 22px">Download</button></div>
-<div class="row"><input id="mt" placeholder="Photo title"><button id="sv">💾 Save to Our Memories</button><button id="sh">🔗 Share</button></div>
-<small>No watermarks. Saved memories stay private on this device.</small></details>
-</div></div></section>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>LDR PhotoBooth</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Pacifico&family=Patrick+Hand&family=Quicksand:wght@500;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fff7ee;
+      --cd: #fff;
+      --pk: #ffc2d4;
+      --p2: #ff7aa2;
+      --dk: #3b2a35;
+      --mu: #8a6f7d;
+  --panel: #ffffff;
+  --ink: #0b2545;
+  --muted: #4a6080;
+  --line: #b9cadb;
+  --accent: #d9480f;
+  --accent-ink: #ffffff;
+  --ok: #1f9d55;
+  --f-display: "Chakra Petch", "Segoe UI", system-ui, sans-serif;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    }
 
-<section id="gallery" data-p hidden><h2>Frame Gallery</h2><div id="gb"></div></section>
+    @media(prefers-color-scheme:dark) {
+      :root:not([data-theme=light]) {
+        --bg: #241a21;
+        --cd: #33252e;
+        --pk: #6b3347;
+        --dk: #ffeef3;
+        --mu: #d3aebc
+      }
+    }
 
-<section id="ldr" data-p hidden><h2>LDR Corner 💌</h2><p><a class="btn big" href="#collab">Invite Your Partner 💌</a></p><p>Made for two people in two places. Pick a caption, then jump into the booth.</p>
-<div class="chips" id="caps"></div>
-<div class="cards" style="margin:16px 0"><div class="card"><h3>Split layout</h3><p>Each partner places their own photo side by side.</p><button id="gs">Open split booth</button></div>
-<div class="card"><h3>Turn-taking session</h3><p>Pass the camera: you and your partner take turns filling a shared strip. Photos get name tags.</p><button id="gt">Start session</button></div>
-<div class="card"><h3>Matching frames</h3><p>Both of you use the same frame — one picks “Partner A”, the other “Partner B” (colors swap). Send each other your halves and combine in a split layout.</p><button id="gm">Go to booth</button></div></div>
-<h3>Distance &amp; matching frames</h3><div id="lb"></div></section>
+    :root[data-theme=dark] {
+      --bg: #241a21;
+      --cd: #33252e;
+      --pk: #6b3347;
+      --dk: #ffeef3;
+      --mu: #d3aebc;
+      --panel: #0f2f57;
+      --ink: #e8f1fb;
+      --muted: #9db4cf;
+      --line: #25507f;
+      --accent: #ff8a4c;
+      --accent-ink: #0a2342;
+      --ok: #4ade80;
+      color-scheme: dark;
+    }
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
-<section id="collab" data-p hidden><style>.cg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}@media(max-width:800px){.cg{grid-template-columns:1fr}}#cPrev{max-width:100%;background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/20px 20px;border-radius:12px}#cc{max-width:100%;max-height:70vh;border-radius:12px;box-shadow:0 8px 28px #0003}fieldset{border:0;padding:0;margin:0}.qr img{width:170px;height:170px;border-radius:12px;background:#fff;padding:6px}.code{font:700 20px monospace;word-break:break-all}</style>
-<h2>Live Camera Collab 💌</h2>
-<div id="cNo" class="card" hidden><b>Live rooms aren’t available in this view.</b><p>Couldn’t reach the connection service (PeerJS signaling) or this network blocks it. Check your connection and try again. Nothing is simulated here.</p></div>
-<div id="c0"><p>Each of you uses your own camera, in your own place, and we combine you into one picture. No gallery uploads needed.</p>
-<div class="row"><button class="big" id="cInv">Invite Your Partner 💌</button></div>
-<div class="row"><input id="cN1" placeholder="Your nickname"><input id="cN2" placeholder="Partner’s nickname"><label>Invite valid for <select id="cExp"><option value="15">15 min</option><option value="60" selected>1 hour</option><option value="1440">24 hours</option></select></label></div>
-<h3>Got an invitation?</h3><div class="row"><input id="cCode" placeholder="Paste invite code"><button id="cJoin">Join room</button></div></div>
-<div id="c1" hidden><div id="cDis" class="card" hidden>⚠️ Connection lost, reconnecting…</div><p id="cInfo"></p><div id="cKnock"></div>
-<div class="cg"><div>
-<div id="cInvP" class="card"><b id="cMsg"></b><div class="row"><div class="qr" id="cQr"></div><div><div>Session code</div><div class="code" id="cCodeOut"></div><small id="cExpT"></small></div></div><div class="row"><input id="cLink" readonly style="flex:1;min-width:0"><button id="cCopy">Copy Invite Link</button><button id="cShare">Share Invitation</button></div><div class="row"><button id="cRev">Revoke invitation</button><button id="cKick">Remove partner</button></div><small>If the link doesn’t open the join screen, send the code instead.</small></div>
-<div id="cSt" class="cards"></div><button id="cEnd">End / leave session</button>
-<div id="cWork" hidden><h3>1 · Your camera</h3><div class="row"><button id="cCam">🎥 Start my camera</button></div>
-<div id="cCamBox" hidden><div class="vw"><video id="cVid" playsinline muted style="transform:scaleX(-1)"></video><div id="cCd" style="position:absolute;inset:0;display:grid;place-items:center;font:110px Pacifico,cursive;color:#fff;text-shadow:0 0 20px #e8466f" hidden></div></div><div class="row"><select id="cTm"><option>3</option><option>5</option><option>10</option></select>s<button id="cSnap">📷 Snap</button></div></div>
-<div id="cPv" hidden><canvas id="cPrev" width="10" height="10"></canvas><div class="row"><label><input type="checkbox" id="cCut" checked> Quick cutout (best on a plain background)</label><label>Strength <input type="range" id="cTol" min="20" max="140" value="70"></label></div><div class="row"><button id="cRe">Retake</button></div><label class="row"><input type="checkbox" id="cOk"> I agree to share this photo with my partner</label><button id="cSend" class="big" style="padding:10px 22px">Send to room 💗</button></div></div></div>
-<div id="cComp" hidden><h3>2 · Together</h3><p id="cPen"></p><canvas id="cc" width="600" height="760"></canvas>
-<fieldset id="cCtl"><div class="row"><select id="cWho"><option value="a">Partner A</option><option value="b">Partner B</option></select><label>←→ <input type="range" id="cx" min="0" max="1" step=".01"></label><label>↑↓ <input type="range" id="cy" min=".5" max="1" step=".01"></label><label>Size <input type="range" id="cz" min=".4" max="1.6" step=".01"></label></div>
-<div class="row"><select id="cBg"><option value="0">Pink sky</option><option value="1">Blue to blush</option><option value="2">Midnight</option><option value="3">Sunset</option><option value="4">Lavender</option></select><label><input type="checkbox" id="cSh"> Shadows</label><button id="cFp">◀ Frame</button><button id="cFn">Frame ▶</button></div>
-<div class="row" id="cEmo"></div><div class="row"><input id="cCap" placeholder="Caption"><input id="cLab" placeholder="Anniversary / label"><input id="cDt" type="date"></div></fieldset>
-<div class="row"><button id="cPass">🖊 Pass the pen</button><button id="cDl">⬇ Download</button><button id="cSv">💾 Save to Our Memories</button><button id="cEd">Open in full editor</button><button id="cNext">Create Another Together</button></div></div></div></div></div></section>
-<section id="memories" data-p hidden><h2>Our Memories</h2><p class="hint">🔒 Guest mode: everything below is stored only in this browser. Nothing is public.</p><div class="cards" id="ml"></div></section>
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
 
-<section id="about" data-p hidden><h2>About</h2><p>LDR PhotoBooth helps long-distance couples, friends and family make shared photo strips and keepsakes. Everything runs in your browser: photos never leave your device unless you share them yourself.</p>
-<h3>Hosting &amp; backend</h3><p>This is a static site: drop it on Netlify or Vercel for free. Cloud galleries, accounts and shareable links need a backend (for example Supabase: auth + Postgres + storage with row-level security, or Firebase). Those services have free tiers with storage and bandwidth limits — check current limits before launch. Real-time remote sessions would additionally need WebRTC or a realtime channel.</p></section>
+    * {
+      box-sizing: border-box
+    }
 
-<section id="help" data-p hidden><h2>Help</h2><h3>Camera</h3><p>Press “Start camera” and allow access when your browser asks. If you blocked it, click the lock icon in the address bar and allow the camera, or use Upload. Camera needs HTTPS.</p>
-<h3>Upload</h3><p>Choose photos from your gallery (images up to 20 MB). They fill empty slots in order.</p>
-<h3>Edit</h3><p>Tap a photo or sticker to select it, drag to move, use the sliders to zoom and rotate. “Retake slot” clears the selected photo; Earlier/Later reorders.</p>
-<h3>Download &amp; share</h3><p>Choose PNG or JPEG and Download. “Share” uses your device’s share sheet. “Save” keeps it in Our Memories on this device.</p></section>
-</main><div id="toast" hidden></div>
-<script>
-const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelectorAll(s)];
-const LS=(k,d)=>{try{return JSON.parse(localStorage.getItem('ldr_'+k))??d}catch(e){return d}},SS=(k,v)=>{try{localStorage.setItem('ldr_'+k,JSON.stringify(v));return 1}catch(e){return 0}};
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const wait=t=>new Promise(r=>setTimeout(r,t));
-let tT;const toast=m=>{const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(tT);tT=setTimeout(()=>t.hidden=true,4000)};
-const C=[
-['Love & Couple','#ffe3ea','#e8466f','#ff9db5','💖💕💘💞','Us, always|My person|Love you most|Better together|Two hearts, one story|Forever yours'],
-['Long Distance (LDR)','#e6f0ff','#4a6fd8','#ff9db5','✈️💌🗺️⭐','Miles apart, hearts together|I miss you|Until we meet again|You are my favorite person|Same sky, same stars|Counting days to you'],
-['Cute & Kawaii','#fff0f7','#ff5fa2','#b9a6ff','🧸🐰🍓☁️','Kawaii club|So fluffy|Cutie patootie|Sparkle time|Bunny hugs|Strawberry smiles'],
-['Pink & Pastel','#ffe0ec','#f06292','#ffc2d4','🌸🎀💗✨','Pink vibes|Cotton candy|Rosy day|Blush mood|Pastel dreams|Sweet as peach'],
-['Minimalist','#fafafa','#222222','#999999','◦·+','Simple|Just us|Us.|Less is more|Quiet moments|Together'],
-['Retro & Vintage','#f6e7c8','#a0522d','#d98c4a','☀️🌼📻🎞️','Good old days|Retro love|Vintage us|Groovy|Remember when|Classic duo'],
-['Film Camera','#222222','#f5d76e','#ffffff','🎞️📷','Roll 01|Kodak moment|35mm memories|Developed with love|Frame by frame|Exposure: us'],
-['Polaroid','#fffdf8','#555555','#e8a0b4','📌🌿','Polaroid day|Snap!|Instant us|Shake it|Memory print|Dear moment'],
-['Anime & Cartoon','#e8f6ff','#ff6b9d','#5ec8ff','💥⚡🌟💫','Episode 01|Main characters|Plot twist: love|Power duo|Sparkle!|Best arc ever'],
-['Birthday','#fff3d6','#ff8a3d','#ff6fb1','🎂🎈🎉🎁','Happy birthday!|Another year cuter|Make a wish|Party time|Cake o’clock|Birthday bestie'],
-['Anniversary','#fbe9f0','#b5365f','#e0a96d','🥂💍🌹💝','Happy anniversary|Another year of us|Still choosing you|Our day|Cheers to us|Years of love'],
-['Valentine’s Day','#ffd9e2','#d81b60','#ff80ab','💌🌹💘😘','Be mine|Cupid’s pick|Roses & you|Valentine me|XOXO|Love letter'],
-['Christmas & Seasonal','#e8f5e9','#c62828','#2e7d32','🎄⛄❄️🎅','Merry & bright|Cozy winter|Snow much love|Jingle all the way|Santa’s list|Warm wishes'],
-['Friendship','#fff6d8','#f9a825','#4fc3f7','🌈👯🤝⭐','Besties|Squad goals|Friends forever|Partners in crime|Ride or die|Soul sisters'],
-['Funny & Meme','#fff9c4','#ff5722','#7e57c2','😂💀🤡🔥','No thoughts, just us|Certified chaos|Cringe but cute|Mood.|We tried|Send help'],
-['K-Pop Inspired','#f1e6ff','#8e44ff','#ff4fa0','💜🎤✨🪩','Comeback era|Bias wrecker|Fan meeting|Stage lights|Photocard mood|Encore!'],
-['Black & White','#ffffff','#111111','#777777','▪▫✦','Monochrome|Noir love|Classic|Timeless|Ink & light|Black tie'],
-['Aesthetic Scrapbook','#f3e5d0','#7b5e3b','#e07a8c','📎🌿✂️🖍️','Memory lane|Scrap it|Little notes|Pressed flowers|Journal day|Taped in'],
-['Matching Couple','#ffe8f0','#e91e63','#3f8cff','🧩💑🔗','Puzzle piece|Perfect match|Half of whole|Linked hearts|Mirror me|Two of a kind'],
-['Custom Style','#f0eaff','#7c4dff','#ffb74d','🖼️🎨✏️','Make it yours|Draw your own|Your style|DIY frame|Blank canvas|My design']];
-const F=[];C.forEach((c,ci)=>c[5].split('|').forEach((cap,v)=>{const dk=ci==6||(v==4&&ci%3==0)?1:0;F.push({id:F.length,cat:ci,cap,bg:dk?(ci==6?c[1]:'#2b2030'):c[1],a:dk&&ci!=6?c[3]:c[2],b:c[3],e:c[4].match(/\p{Extended_Pictographic}\uFE0F?|./gu),pat:(v+ci)%6,bd:(ci*3+v*5)%8,dk})}));
-const L={single:[600,760,[[36,36,528,540]]],duo:[600,1100,[[36,36,528,460],[36,508,528,460]]],trio:[600,1400,[0,1,2].map(i=>[36,36+i*388,528,376])],quad:[600,800,[[36,36,258,258],[306,36,258,258],[36,306,258,258],[306,306,258,258]]],strip:[360,1360,[0,1,2,3].map(i=>[36,24+i*276,288,264])],split:[1100,660,[[36,36,500,470],[564,36,500,470]]]};
-const blank=()=>({im:-1,ox:0,oy:0,z:1,r:0});
-const newSt=()=>({layout:'single',f:0,slots:[blank()],stk:[],names:['',''],cap:'',msg:'',date:'',label:'',pair:0,col:'',bgc:'',ov:-1,sess:0,turn:0});
-let st=newSt(),imgs=[],sel=null,hist=[],redo=[],drag=null;
-const mx=document.createElement('canvas').getContext('2d');
-function sbox(k){if(k.t=='i'){const m=imgs[k.im];return[k.s,k.s*m.height/m.width]}mx.font=k.t=='e'?`${k.s}px serif`:`${k.s}px ${k.f}`;return[mx.measureText(k.v).width,k.s*1.2]}
-function render(x,s,sc,ui){
- const[W,H,S]=L[s.layout],f=F[s.f],dk=f.dk;let a=s.col||f.a,b=f.b;if(+s.pair)[a,b]=[b,a];
- const bg=s.bgc||f.bg,tx=dk?'#fff7ee':a,ink=dk?'#fff7ee':'#3b2a35';
- x.setTransform(sc,0,0,sc,0,0);x.clearRect(0,0,W,H);x.fillStyle=bg;x.fillRect(0,0,W,H);x.textAlign='center';x.textBaseline='middle';
- x.save();x.globalAlpha=.14;x.fillStyle=x.strokeStyle=dk?'#fff':a;const p=f.pat;
- if(p==1)for(let i=0;i<W;i+=40)for(let j=0;j<H;j+=40){x.beginPath();x.arc(i+20,j+20,4,0,7);x.fill()}
- if(p==2){x.lineWidth=10;for(let i=-H;i<W;i+=36){x.beginPath();x.moveTo(i,0);x.lineTo(i+H,H);x.stroke()}}
- if(p==3)for(let i=0;i*40<W;i++)for(let j=0;j*40<H;j++)if((i+j)%2)x.fillRect(i*40,j*40,40,40);
- if(p==4){for(let i=0;i<W;i+=40)x.fillRect(i,0,2,H);for(let j=0;j<H;j+=40)x.fillRect(0,j,W,2)}
- if(p==5){x.font='34px serif';for(let i=0;i*90<W+90;i++)for(let j=0;j*90<H+90;j++)x.fillText(f.e[(i+j)%f.e.length],i*90+(j%2)*45,j*90)}
- x.restore();
- S.forEach((r,i)=>{const[rx,ry,rw,rh]=r,sl=s.slots[i]||blank(),im=imgs[sl.im];x.save();x.beginPath();x.rect(rx,ry,rw,rh);x.clip();
-  if(im){const k=Math.max(rw/im.width,rh/im.height)*sl.z;x.translate(rx+rw/2+sl.ox,ry+rh/2+sl.oy);x.rotate(sl.r*Math.PI/180);x.drawImage(im,-im.width*k/2,-im.height*k/2,im.width*k,im.height*k)}
-  else{x.fillStyle=dk?'#ffffff22':'#ffffff99';x.fillRect(rx,ry,rw,rh);x.fillStyle=b;x.globalAlpha=.7;x.font=Math.min(rw,rh)/4+'px serif';x.fillText('📷',rx+rw/2,ry+rh/2)}
-  x.restore();
-  if(s.sess&&im&&sl.by!=null){const t=s.names[sl.by]||(sl.by?'Partner B':'Partner A');x.font='700 22px Quicksand,sans-serif';const w=x.measureText(t).width+22;x.fillStyle=a;x.fillRect(rx+8,ry+rh-38,w,28);x.fillStyle='#fff';x.fillText(t,rx+8+w/2,ry+rh-24)}
-  if(ui&&sel&&sel.t=='p'&&sel.i==i){x.save();x.strokeStyle='#ff3d7f';x.lineWidth=4;x.setLineDash([12,8]);x.strokeRect(rx+2,ry+2,rw-4,rh-4);x.restore()}});
- const ring=(inset,step,fn)=>{const w=W-2*inset,h=H-2*inset,P=2*(w+h);for(let t=0;t<P;t+=step){let u=t,px,py;if(u<w){px=inset+u;py=inset}else if((u-=w)<h){px=W-inset;py=inset+u}else if((u-=h)<w){px=W-inset-u;py=H-inset}else{u-=w;px=inset;py=H-inset-u}fn(px,py,t)}};
- x.save();x.strokeStyle=x.fillStyle=a;const bd=f.bd;
- if(bd==0){x.lineWidth=20;x.strokeRect(10,10,W-20,H-20)}
- if(bd==1){x.lineWidth=4;x.strokeRect(6,6,W-12,H-12);x.strokeStyle=b;x.lineWidth=6;x.strokeRect(18,18,W-36,H-36)}
- if(bd==2){x.lineWidth=10;x.setLineDash([22,14]);x.strokeRect(16,16,W-32,H-32)}
- if(bd==3){x.fillStyle=b;ring(14,30,(px,py)=>{x.beginPath();x.arc(px,py,13,0,7);x.fill()});x.fillStyle=a;ring(14,60,(px,py)=>{x.beginPath();x.arc(px,py,6,0,7);x.fill()})}
- if(bd==4){x.fillStyle='#111';x.fillRect(0,0,30,H);x.fillRect(W-30,0,30,H);x.fillStyle=dk?'#f5d76e':'#fff';for(let j=14;j<H;j+=44){x.fillRect(8,j,14,20);x.fillRect(W-22,j,14,20)}}
- if(bd==5){x.strokeStyle='#fff';x.lineWidth=32;x.strokeRect(16,16,W-32,H-32);x.strokeStyle=b;x.lineWidth=2;x.strokeRect(32,32,W-64,H-64)}
- if(bd==6)ring(18,22,(px,py)=>{x.beginPath();x.arc(px,py,5,0,7);x.fill()});
- if(bd==7){x.lineWidth=12;x.strokeStyle=b;x.strokeRect(6,6,W-12,H-12);[[0,0,1,1],[W,0,-1,1],[0,H,1,-1],[W,H,-1,-1]].forEach(([px,py,u,v])=>{x.beginPath();x.moveTo(px,py);x.lineTo(px+u*60,py);x.lineTo(px,py+v*60);x.fill()})}
- x.restore();
- let q=f.id*9301+49297;const R=()=>(q=(q*9301+49297)%233280)/233280,step=2*(W+H-72)/12;
- ring(18,step,(px,py,t)=>{x.save();x.translate(px,py);x.rotate(R()-.5);x.font=(24+R()*14)+'px serif';x.fillText(f.e[Math.round(t/step)%f.e.length],0,0);x.restore()});
- const zy=Math.max(...S.map(r=>r[1]+r[3]))+14,zh=H-zy-20,wmax=W-2*Math.min(110,W*.2);
- x.font=Math.min(60,W*.08)+'px serif';x.fillText(f.e[0],W*.1,zy+zh/2);x.fillText(f.e[1%f.e.length],W*.9,zy+zh/2);
- const cap=s.cap||f.cap;let fs=Math.min(W*.09,60);x.font=`${fs}px Pacifico,cursive`;while(x.measureText(cap).width>wmax&&fs>14){fs-=2;x.font=`${fs}px Pacifico,cursive`}
- const nm=s.names[0]||s.names[1]?`${s.names[0]||'…'} ♥ ${s.names[1]||'…'}`:'',dl=[s.label,s.date].filter(Boolean).join(' · ');
- const ln=[[cap,`${fs}px Pacifico,cursive`,tx],[nm,`700 ${fs*.55}px Quicksand,sans-serif`,ink],[dl,`${fs*.5}px "Patrick Hand",cursive`,ink],[s.msg,`${fs*.5}px "Patrick Hand",cursive`,ink]].filter(l=>l[0]),lh=zh/(ln.length+1);
- ln.forEach((l,i)=>{x.font=l[1];x.fillStyle=l[2];x.fillText(l[0],W/2,zy+lh*(i+1),wmax)});
- s.stk.forEach((k,i)=>{x.save();x.translate(k.x,k.y);x.rotate(k.r*Math.PI/180);if(k.t=='i'){const m=imgs[k.im],h=k.s*m.height/m.width;x.drawImage(m,-k.s/2,-h/2,k.s,h)}else{x.font=k.t=='e'?`${k.s}px serif`:`${k.s}px ${k.f}`;x.fillStyle=k.c||'#000';x.fillText(k.v,0,0)}
-  if(ui&&sel&&sel.t=='s'&&sel.i==i){const[w,h]=sbox(k);x.strokeStyle='#ff3d7f';x.lineWidth=3;x.setLineDash([8,6]);x.strokeRect(-w/2-6,-h/2-6,w+12,h+12)}x.restore()});
- if(s.ov>=0&&imgs[s.ov])x.drawImage(imgs[s.ov],0,0,W,H);
-}
-const cv=$('#cv');
-function draw(){const[W,H]=L[st.layout],sc=Math.min(1.5,900/W);cv.width=W*sc;cv.height=H*sc;render(cv.getContext('2d'),st,sc,1)}
-function thumb(id){const c=document.createElement('canvas');c.width=100;c.height=127;render(c.getContext('2d'),{...newSt(),f:id},1/6,0);return c}
-const push=()=>{hist.push(JSON.stringify(st));if(hist.length>60)hist.shift();redo=[]};
-function sync(){$('#n1').value=st.names[0];$('#n2').value=st.names[1];$('#cap').value=st.cap;$('#msg').value=st.msg;$('#dt').value=st.date;$('#lab').value=st.label;$('#lay').value=st.layout;$('#pair').value=st.pair;$('#sess').checked=!!st.sess;turnlab()}
-function turnlab(){$('#turnlab').textContent=st.sess?'— next: '+(st.names[st.turn]||(st.turn?'Partner B':'Partner A')):''}
-function setLayout(k){st.layout=k;const n=L[k][2].length;while(st.slots.length<n)st.slots.push(blank());st.slots.length=n;sel=null;$('#lay').value=k;draw()}
-function setFrame(id){push();st.f=id;SS('rec',[id,...LS('rec',[]).filter(i=>i!=id)].slice(0,24));draw();B.bb&&B.bb.rd()}
-function undo(){if(!hist.length)return;redo.push(JSON.stringify(st));st=JSON.parse(hist.pop());sel=null;sync();draw()}
-$('#undo').onclick=undo;$('#redo').onclick=()=>{if(!redo.length)return;hist.push(JSON.stringify(st));st=JSON.parse(redo.pop());sel=null;sync();draw()};
-$('#reset').onclick=()=>{if(confirm('Reset everything in the editor?')){push();st=newSt();sel=null;sync();draw()}};
-$('#lay').onchange=e=>{push();setLayout(e.target.value)};
-[['n1',v=>st.names[0]=v],['n2',v=>st.names[1]=v],['cap',v=>st.cap=v],['msg',v=>st.msg=v],['dt',v=>st.date=v],['lab',v=>st.label=v],['col',v=>st.col=v],['bgc',v=>st.bgc=v],['pair',v=>st.pair=+v]].forEach(([id,fn])=>{const e=$('#'+id);e.onfocus=e.onpointerdown=push;e.oninput=()=>{fn(e.value);turnlab();draw()}});
-$('#cx').onclick=()=>{push();st.col=st.bgc='';draw()};
-$('#sess').onchange=e=>{push();st.sess=e.target.checked?1:0;st.turn=0;turnlab();draw()};
-const cur=()=>sel&&(sel.t=='p'?st.slots[sel.i]:st.stk[sel.i]);
-function syncSel(){const z=$('#sz'),r=$('#rot'),o=cur();if(!o)return;if(sel.t=='p'){z.min=.5;z.max=4;z.step=.01;z.value=o.z}else{z.min=16;z.max=500;z.step=1;z.value=o.s}r.value=o.r}
-$('#sz').onpointerdown=$('#rot').onpointerdown=push;
-$('#sz').oninput=e=>{const o=cur();if(!o)return;o[sel.t=='p'?'z':'s']=+e.target.value;draw()};
-$('#rot').oninput=e=>{const o=cur();if(!o)return;o.r=+e.target.value;draw()};
-$('#del').onclick=()=>{if(sel&&sel.t=='s'){push();st.stk.splice(sel.i,1);sel=null;draw()}else toast('Select a sticker first.')};
-$('#retake').onclick=()=>{if(sel&&sel.t=='p'){push();st.slots[sel.i]=blank();draw();toast('Slot cleared — snap or upload to refill.')}else toast('Tap a photo slot first.')};
-const mv=d=>{if(!sel||sel.t!='p')return toast('Tap a photo slot first.');const j=sel.i+d;if(j<0||j>=st.slots.length)return;push();[st.slots[sel.i],st.slots[j]]=[st.slots[j],st.slots[sel.i]];sel.i=j;draw()};
-$('#mvl').onclick=()=>mv(-1);$('#mvr').onclick=()=>mv(1);
-const pt=e=>{const r=cv.getBoundingClientRect(),[W,H]=L[st.layout];return{x:(e.clientX-r.left)/r.width*W,y:(e.clientY-r.top)/r.height*H}};
-function hit(p){for(let i=st.stk.length-1;i>=0;i--){const k=st.stk[i],a=-k.r*Math.PI/180,dx=p.x-k.x,dy=p.y-k.y,ux=dx*Math.cos(a)-dy*Math.sin(a),uy=dx*Math.sin(a)+dy*Math.cos(a),[w,h]=sbox(k);if(Math.abs(ux)<w/2+8&&Math.abs(uy)<h/2+8)return{t:'s',i}}
- const S=L[st.layout][2];for(let i=S.length-1;i>=0;i--){const[x,y,w,h]=S[i];if(p.x>=x&&p.x<=x+w&&p.y>=y&&p.y<=y+h)return{t:'p',i}}return null}
-cv.onpointerdown=e=>{const p=pt(e);sel=hit(p);const o=cur();if(o){push();cv.setPointerCapture(e.pointerId);drag=sel.t=='p'?{p,a:o.ox,b:o.oy}:{p,a:o.x,b:o.y};syncSel()}draw()};
-cv.onpointermove=e=>{if(!drag||!sel)return;const p=pt(e),o=cur(),dx=p.x-drag.p.x,dy=p.y-drag.p.y;if(sel.t=='p'){o.ox=drag.a+dx;o.oy=drag.b+dy}else{o.x=drag.a+dx;o.y=drag.b+dy}draw()};
-cv.onpointerup=cv.onpointercancel=()=>drag=null;
-cv.onwheel=e=>{const o=cur();if(!o)return;e.preventDefault();const f=e.deltaY<0?1.05:.95;if(sel.t=='p')o.z=Math.min(4,Math.max(.5,o.z*f));else o.s=Math.min(500,Math.max(16,o.s*f));syncSel();draw()};
-// camera
-let stream,facing='user',busy=0;const vid=$('#vid');
-async function startCam(){if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return toast('Camera isn’t supported on this device or connection (needs HTTPS). Try Upload instead.');
- try{stream&&stream.getTracks().forEach(t=>t.stop());stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing,width:{ideal:1280},height:{ideal:960}},audio:false});vid.srcObject=stream;await vid.play();vid.style.transform=facing=='user'?'scaleX(-1)':'none';$('#camBox').hidden=false}
- catch(e){toast(e.name=='NotAllowedError'?'Camera permission denied. Allow it in your browser settings, or upload photos instead.':e.name=='NotFoundError'?'No camera found. Try Upload instead.':'Couldn’t open the camera: '+e.message)}}
-$('#cam').onclick=startCam;$('#flip').onclick=()=>{facing=facing=='user'?'environment':'user';stream?startCam():toast('Start the camera first.')};
-function grab(){const c=document.createElement('canvas');c.width=vid.videoWidth;c.height=vid.videoHeight;const x=c.getContext('2d');if(facing=='user'){x.translate(c.width,0);x.scale(-1,1)}x.drawImage(vid,0,0);return c}
-function nextSlot(){if(sel&&sel.t=='p'&&st.slots[sel.i].im<0)return sel.i;const i=st.slots.findIndex(s=>s.im<0);return i>=0?i:sel&&sel.t=='p'?sel.i:0}
-function place(c,i){push();imgs.push(c);const o=blank();o.im=imgs.length-1;if(st.sess){o.by=st.turn;st.turn^=1;turnlab()}st.slots[i]=o;sel={t:'p',i};syncSel();draw()}
-async function shoot(i){const cd=$('#cd');for(let k=+$('#timer').value;k>0;k--){cd.textContent=k;cd.hidden=false;await wait(1000)}cd.textContent='📸';await wait(250);cd.hidden=true;place(grab(),i)}
-$('#snap').onclick=async()=>{if(busy||!stream)return;busy=1;await shoot(nextSlot());busy=0};
-$('#auto').onclick=async()=>{if(busy||!stream)return;busy=1;for(let i=0;i<st.slots.length;i++){await shoot(i);await wait(500)}busy=0};
-function load(f,max){return new Promise((ok,no)=>{const u=URL.createObjectURL(f),im=new Image();im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);ok(c)};im.onerror=()=>no();im.src=u})}
-async function files(list,cb){for(const f of list){if(!f.type.startsWith('image/')||f.size>20e6){toast(`“${f.name}” isn’t a supported image (max 20 MB).`);continue}try{cb(await load(f,1600))}catch(e){toast('Couldn’t read '+f.name+'.')}}}
-$('#up').onchange=async e=>{await files(e.target.files,c=>place(c,nextSlot()));e.target.value=''};
-$('#upk').onchange=async e=>{await files(e.target.files,c=>{push();imgs.push(c);const[W,H]=L[st.layout];st.stk.push({t:'i',im:imgs.length-1,x:W/2,y:H/2,s:200,r:0});sel={t:'s',i:st.stk.length-1};syncSel();draw()});e.target.value=''};
-$('#ovf').onchange=async e=>{await files(e.target.files,c=>{push();imgs.push(c);st.ov=imgs.length-1;draw()});e.target.value=''};
-$('#ovx').onclick=()=>{push();st.ov=-1;draw()};
-'💖🌸⭐🎀🧸🐰🐱🌙☁️✈️💌🗺️🍓✨🦋🌈🌹💕'.match(/\p{Extended_Pictographic}\uFE0F?/gu).forEach(e=>{const b=document.createElement('button');b.className='sk';b.textContent=e;b.onclick=()=>{push();const[W,H]=L[st.layout];st.stk.push({t:'e',v:e,x:W/2+(Math.random()-.5)*120,y:H/2+(Math.random()-.5)*120,s:72,r:0});sel={t:'s',i:st.stk.length-1};syncSel();draw()};$('#emo').append(b)});
-$('#tadd').onclick=()=>{const v=$('#tt').value.trim();if(!v)return toast('Type some text first.');push();const[W,H]=L[st.layout];st.stk.push({t:'t',v,f:$('#tf').value,c:$('#tc').value,x:W/2,y:H/2,s:+$('#ts').value||56,r:0});sel={t:'s',i:st.stk.length-1};syncSel();draw()};
-// export
-function out(sc,type,q){const c=document.createElement('canvas'),[W,H]=L[st.layout];c.width=W*sc;c.height=H*sc;render(c.getContext('2d'),st,sc,0);return new Promise(r=>c.toBlob(r,type,q))}
-const hq=()=>L[st.layout][0]<700?3:2;
-$('#dl').onclick=async()=>{const t=$('#fmt').value,b=await out(hq(),'image/'+t,.95);if(!b)return toast('Export failed — try a smaller layout.');const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`ldr-photobooth.${t=='png'?'png':'jpg'}`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)};
-$('#sv').onclick=async()=>{const b=await out(1,'image/jpeg',.75),u=await new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)}),m=LS('mem',[]);m.unshift({id:Date.now(),t:$('#mt').value||'Untitled memory',c:st.cap||F[st.f].cap,d:st.date||new Date().toLocaleDateString(),u});if(!SS('mem',m))return toast('Browser storage is full — delete old memories or download instead.');toast('Saved to Our Memories 💖')};
-$('#sh').onclick=async()=>{const b=await out(2,'image/png'),f=new File([b],'ldr-photobooth.png',{type:'image/png'});if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:$('#mt').value||'LDR PhotoBooth'})}catch(e){}}else toast('Sharing isn’t available here — download it and send it directly. Shareable links need a backend (see About).')};
-function mem(){const m=LS('mem',[]);$('#ml').innerHTML=m.length?m.map(o=>`<div class="card"><img src="${o.u}" alt=""><b>${esc(o.t)}</b><p>${esc(o.c)}</p><small>${esc(o.d)} · 🔒 Private on this device</small><div class="row"><a class="btn" download="${esc(o.t)}.jpg" href="${o.u}">Download</a><button data-d="${o.id}">Delete</button></div></div>`).join(''):'<p>No memories yet — make one in the PhotoBooth!</p>'}
-$('#ml').onclick=e=>{const d=e.target.dataset.d;if(d&&confirm('Delete this memory?')){SS('mem',LS('mem',[]).filter(o=>o.id!=d));mem()}};
-// frame browser
-function browser(root,pick,only){
- root.innerHTML=`<div class="row"><input class="q" placeholder="Search frames…"><select class="cs"><option value="">All categories</option>${C.map((c,i)=>`<option value="${i}">${c[0]}</option>`).join('')}</select><select class="tb"><option value="all">All</option><option value="fav">♥ Favorites</option><option value="rec">Recent</option></select><button class="rnd">🎲 Random</button></div><div class="fg"></div><div class="row"><button class="more">Load more</button></div>`;
- const g=$('.fg',root),q=$('.q',root),cs=$('.cs',root),tb=$('.tb',root);let n=24;
- if(only)$$('option',cs).forEach(o=>{if(o.value!==''&&!only.includes(+o.value))o.remove()});
- const list=()=>{const fv=LS('fav',[]),t=q.value.toLowerCase();let r=F.filter(f=>(!only||only.includes(f.cat))&&(cs.value===''||f.cat==cs.value)&&(f.cap+' '+C[f.cat][0]).toLowerCase().includes(t));if(tb.value=='fav')r=r.filter(f=>fv.includes(f.id));if(tb.value=='rec')r=LS('rec',[]).map(i=>F[i]).filter(f=>r.includes(f));return r};
- const rd=()=>{const r=list(),fv=LS('fav',[]);g.innerHTML='';r.slice(0,n).forEach(f=>{const d=document.createElement('div');d.className='fi'+(st.f==f.id?' on':'');d.append(thumb(f.id));d.insertAdjacentHTML('beforeend',`<span>${esc(f.cap)}</span><button class="hb" title="Favorite">${fv.includes(f.id)?'♥':'♡'}</button>`);d.onclick=e=>{if(e.target.classList.contains('hb')){const a=LS('fav',[]),i=a.indexOf(f.id);i<0?a.push(f.id):a.splice(i,1);SS('fav',a);rd();return}pick(f.id)};g.append(d)});if(!r.length)g.textContent='No frames found.';$('.more',root).hidden=r.length<=n};
- q.oninput=cs.onchange=tb.onchange=()=>{n=24;rd()};$('.more',root).onclick=()=>{n+=24;rd()};
- $('.rnd',root).onclick=()=>{const r=list();if(r.length)pick(r[Math.floor(Math.random()*r.length)].id)};
- rd();return{rd,cat(i){cs.value=i;n=24;rd()}}}
-const B={};
-const goBooth=id=>{setFrame(id);location.hash='booth'};
-B.bb=browser($('#bb'),setFrame);B.gal=browser($('#gb'),goBooth);B.ldr=browser($('#lb'),goBooth,[1,18]);
-$('#feat').append(...[0,13,26,32,42,51,60,66,78,90,100,110].map(i=>{const d=document.createElement('div');d.className='fi';d.append(thumb(i));d.insertAdjacentHTML('beforeend','<span>'+esc(F[i].cap)+'</span>');d.onclick=()=>goBooth(i);return d}));
-C.forEach((c,i)=>{const b=document.createElement('span');b.className='chip';b.textContent=c[4].slice(0,2).replace(/[^\p{Extended_Pictographic}]/gu,'')+' '+c[0];b.onclick=()=>{B.gal.cat(i);location.hash='gallery'};$('#cats').append(b)});
-C[1][5].split('|').concat(['Forever & a day','Long-distance, close at heart']).forEach(t=>{const b=document.createElement('span');b.className='chip';b.textContent='“'+t+'”';b.onclick=()=>{push();st.cap=t;sync();draw();location.hash='booth'};$('#caps').append(b)});
-$('#gs').onclick=()=>{push();setLayout('split');location.hash='booth'};
-$('#gt').onclick=()=>{push();st.sess=1;st.turn=0;setLayout('strip');sync();location.hash='booth';toast('Fill in both nicknames, then take turns snapping!')};
-$('#gm').onclick=()=>{B.ldr.cat(18);location.hash='booth'};
-function show(){const ids=['home','booth','gallery','ldr','collab','memories','about','help'],p=location.hash.slice(1),id=ids.includes(p)?p:'home';$$('[data-p]').forEach(s=>s.hidden=s.id!=id);$$('nav a').forEach(a=>a.classList.toggle('on',a.hash=='#'+id));if(id=='booth')draw();if(id=='memories')mem();scrollTo(0,0)}
-addEventListener('hashchange',show);show();
-['20px Pacifico','20px "Patrick Hand"','700 20px Quicksand'].forEach(f=>document.fonts.load(f).then(()=>{draw();B.bb.rd();B.gal.rd()}));
-// ---- Live collab (encrypted relay over the claude.ai room capability) ----
-const A32='0123456789ABCDEFGHJKMNPQRSTVWXYZ',BASE=window.claude?'https://claude.ai/artifact/8xvdE3TkqQpxzmGwEj87YS':'https://photo-booth-ldr.vercel.app/',K={mine:'a',nm:['','']},caps={a:null,b:null},cIdx=imgs.push(null)-1,$c=id=>document.getElementById(id);
-let comp,cs,cstream,sent={},rx={};
-const b32=b=>{let s='',n=0,v=0;for(const x of b){v=(v<<8)|x;n+=8;while(n>=5){s+=A32[(v>>>(n-5))&31];n-=5}v&=(1<<n)-1}if(n)s+=A32[(v<<(5-n))&31];return s};
-const unb32=s=>{let n=0,v=0;const o=[];for(const c of s){const k=A32.indexOf(c);if(k<0)return null;v=(v<<5)|k;n+=5;if(n>=8){o.push((v>>>(n-8))&255);n-=8;v&=(1<<n)-1}}return o.length>=16?new Uint8Array(o.slice(0,16)):null};
-const b64=u=>{let s='';for(let i=0;i<u.length;i+=8192)s+=String.fromCharCode.apply(null,u.subarray(i,i+8192));return btoa(s)},ub64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
-const hex=u=>[...u].map(x=>x.toString(16).padStart(2,'0')).join('');
-async function derive(sec){const h=async t=>new Uint8Array(await crypto.subtle.digest('SHA-256',new Uint8Array([...sec,...new TextEncoder().encode(t)])));K.code=b32(sec);K.rn='r'+hex((await h('room')).slice(0,16));K.key=await crypto.subtle.importKey('raw',await h('key'),'AES-GCM',false,['encrypt','decrypt'])}
-async function enc(o){const iv=crypto.getRandomValues(new Uint8Array(12)),ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},K.key,new TextEncoder().encode(JSON.stringify(o))));const u=new Uint8Array(12+ct.length);u.set(iv);u.set(ct,12);return b64(u)}
-async function dec(s){try{const u=ub64(s);return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},K.key,u.slice(12))))}catch(e){return null}}
-const send=async o=>{try{await K.r.emit('m',{c:await enc(o)})}catch(e){}};
-const me=()=>(K.r.peers().find(p=>p.sameTab)||{}).peer,other=()=>K.mine=='a'?'b':'a',partnerPeer=()=>K.host?K.partner:K.hostPeer;
-const newComp=()=>({bg:0,sh:1,a:[.3,.96,1],b:[.7,.96,1],f:6,cap:'',lab:'',dt:'',stk:[],pen:'a'});
-const BG=[['#ffd6e3','#fff0f5'],['#d9e8ff','#ffe3ea'],['#2b1b3a','#5b2a5a'],['#ffe9c7','#ffc2d4'],['#e6dcff','#f3e5ff']];
-function setP(s){K.st=s;K.r&&K.r.presence({role:K.host?'host':'guest',st:s})}
-const peerLib=()=>window.Peer?Promise.resolve({join:peerRoom}):new Promise(ok=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js';s.onload=()=>ok({join:peerRoom});s.onerror=()=>ok(null);document.head.append(s)});
-function peerRoom(){return new Promise((ok,no)=>{const pr=new Peer(K.host?K.rn:undefined),cn=[],pres={},mine={};let H={m:[],p:[]},id;
- const list=()=>[{peer:id,presence:mine,isMe:true,sameTab:true},...cn.map(c=>({peer:c.peer,presence:pres[c.peer]||{},isMe:false,sameTab:false}))];
- const fire=(j,l,u)=>H.p.forEach(f=>f({peers:list(),joined:j||[],left:l||[],updated:u||[]})),bc=d=>cn.forEach(c=>c.send(d));
- const room={emit:async(t,d)=>bc({k:'m',d}),on:(t,f)=>{H.m.push(f);return()=>{H.m=H.m.filter(x=>x!=f)}},onPeers:f=>{H.p.push(f);setTimeout(()=>f({peers:list(),joined:list(),left:[],updated:[]}));return()=>{H.p=H.p.filter(x=>x!=f)}},presence:async p=>{Object.assign(mine,p);bc({k:'p',p:mine});fire([],[],[list()[0]])},peers:list,onConnection:f=>{setTimeout(()=>f(true));return()=>{}},leave:async()=>{try{pr.destroy()}catch(e){}}};
- const wire=c=>{cn.push(c);c.send({k:'p',p:mine});fire([{peer:c.peer,presence:{},isMe:false,sameTab:false}]);c.on('data',m=>{if(!m)return;if(m.k=='m')H.m.slice().forEach(f=>f({peer:c.peer,isMe:false,sameTab:false,data:m.d}));else if(m.k=='p'&&m.p&&typeof m.p=='object'){pres[c.peer]=m.p;fire([],[],[list().find(x=>x.peer==c.peer)])}});c.on('close',()=>{const e={peer:c.peer,presence:pres[c.peer]||{},isMe:false,sameTab:false},i=cn.indexOf(c);if(i>=0)cn.splice(i,1);delete pres[c.peer];fire([],[e])})};
- pr.on('error',e=>no({code:e.type,message:e.message}));
- pr.on('open',i=>{id=i;if(K.host){pr.on('connection',c=>c.on('open',()=>wire(c)));ok(room)}else{const c=pr.connect(K.rn,{reliable:true});c.on('open',()=>{wire(c);ok(room)});setTimeout(()=>no({code:'peer-unavailable'}),10000)}})})}
-async function openRoom(){let R=window.claude&&await claude.use('room');if(!R)R=await peerLib();if(!R){$c('cNo').hidden=false;return false}try{K.r=await R.join(K.rn)}catch(e){toast(e.code=='peer-unavailable'?'No host found: the code is invalid, the invitation has expired, or the host left.':'Couldn’t open the room ('+(e.code||e.message)+'). Try again.');return false}
- K.off=[K.r.on('m',onMsg),K.r.onPeers(peersChanged),K.r.onConnection(c=>{clearTimeout(K.dt);if(!c)K.dt=setTimeout(()=>$c('cDis').hidden=false,2000);else $c('cDis').hidden=true})];return true}
-function showLobby(){$c('c0').hidden=true;$c('c1').hidden=false;$c('cInvP').hidden=!K.host;refresh()}
-function refresh(){const on=K.host?!!K.partner:!!K.admitted;$c('cWork').hidden=!on;$c('cComp').hidden=!on;$c('cKick').hidden=!(K.host&&K.partner);$c('cInfo').textContent=on?'You’re connected 💗 Take your photo, send it, then edit together.':K.host?'Waiting for your partner to join…':'Knocking… waiting for the host to let you in 💌';if(on&&comp){syncCtl();cdraw()}}
-async function startHost(){const sec=crypto.getRandomValues(new Uint8Array(16));await derive(sec);Object.assign(K,{host:1,mine:'a',nm:[$c('cN1').value.trim()||'Me',$c('cN2').value.trim()||'My love'],exp:Date.now()+(+$c('cExp').value)*6e4,rev:0,partner:null,admitted:0});if(!await openRoom())return;comp=newComp();setP('waiting');showLobby();const l=`${BASE}?join=${K.code}#join=${K.code}`;K.link=l;$c('cLink').value=l;$c('cCodeOut').textContent=K.code.match(/.{1,5}/g).join('-');$c('cMsg').textContent=`Let’s take a photo together, even miles apart! 💗 — ${K.nm[0]}`;const q=window.qrcode&&qrcode(0,'M');if(q){q.addData(l);q.make();$c('cQr').innerHTML=q.createImgTag(4,8)}else $c('cQr').textContent='(QR unavailable — use the code)';clearInterval(K.et);K.et=setInterval(()=>{$c('cExpT').textContent=K.rev?'Invitation revoked.':K.partner?'Invitation used.':Date.now()>K.exp?'Invitation expired.':'Expires in '+Math.ceil((K.exp-Date.now())/6e4)+' min'},1000)}
-async function startGuest(code){const sec=unb32(code.toUpperCase().replace(/[^0-9A-Z]/g,''));if(!sec)return toast('That invite code isn’t valid. Check it and try again.');await derive(sec);Object.assign(K,{host:0,mine:'b',nm:['',''],admitted:0,hostPeer:null});if(!await openRoom())return;setP('waiting');showLobby();$c('cInvP').hidden=true;let n=0;const kn=()=>{if(K.admitted||!K.r)return;if(n++>4){toast('No answer: the invitation may be invalid, expired or revoked, or the host has left.');return cleanup()}send({t:'knock',pid:me()});K.kt=setTimeout(kn,2500)};kn()}
-$c('cInv').onclick=startHost;$c('cJoin').onclick=()=>startGuest($c('cCode').value);
-$c('cCopy').onclick=()=>navigator.clipboard?navigator.clipboard.writeText(K.link).then(()=>toast('Invite link copied 💌'),()=>toast('Couldn’t copy — select the link and copy it.')):toast('Clipboard unavailable — select the link and copy it.');
-$c('cShare').onclick=async()=>{const d={title:'LDR PhotoBooth',text:$c('cMsg').textContent+' Code: '+K.code,url:K.link};if(navigator.share){try{await navigator.share(d)}catch(e){}}else toast('Sharing isn’t available here — copy the link instead.')};
-async function onMsg(m){if(!K.r||(m.isMe&&m.sameTab))return;const o=await dec(m.data&&m.data.c);if(!o)return;const f=m.peer;
- if(o.t=='knock'&&K.host){if(K.rev)return send({t:'deny',to:f,why:'This invitation was revoked.'});if(K.partner&&K.partner!=f)return send({t:'deny',to:f,why:'This room is full.'});if(!K.partner&&Date.now()>K.exp)return send({t:'deny',to:f,why:'This invitation has expired.'});if(K.partner==f)return admit(f);K.knock=f;$c('cKnock').innerHTML='<div class="card">💌 Someone with your code wants to join. <button id="cYes">Admit</button> <button id="cNo2">Deny</button></div>';$c('cYes').onclick=()=>admit(f);$c('cNo2').onclick=()=>{send({t:'deny',to:f,why:'The host declined.'});$c('cKnock').innerHTML=''}}
- else if(o.t=='admit'&&!K.host&&!K.admitted&&o.to==me()){K.admitted=1;K.hostPeer=f;K.nm=o.nm;comp=o.comp;setP('connected');refresh()}
- else if(o.t=='deny'&&!K.host&&o.to==me()){toast(o.why||'Couldn’t join.');cleanup()}
- else if(o.t=='kick'&&o.to==me()&&f==K.hostPeer)cleanup('The host removed you from the session.');
- else if(o.t=='end'&&f==partnerPeer())cleanup('Session ended. Temporary photos were deleted.');
- else if(f==partnerPeer()){
-  if(o.t=='chunk'&&o.n>0&&o.n<=120&&o.i>=0&&o.i<o.n&&typeof o.d=='string'&&['image/webp','image/png'].includes(o.ty)){const r=rx[o.id]||(rx[o.id]={n:o.n,p:{},ty:o.ty});r.p[o.i]=o.d;clearTimeout(r.t);if(Object.keys(r.p).length==r.n){delete rx[o.id];try{const bm=await createImageBitmap(new Blob([ub64(Array.from({length:r.n},(_,i)=>r.p[i]).join(''))],{type:r.ty})),c=document.createElement('canvas');c.width=bm.width;c.height=bm.height;c.getContext('2d').drawImage(bm,0,0);caps[other()]=c;cdraw();toast('Your partner’s photo arrived 💗')}catch(e){toast('Received a photo that couldn’t be read.')}}else r.t=setTimeout(()=>send({t:'need',id:o.id,miss:[...Array(r.n).keys()].filter(i=>!(i in r.p)).slice(0,40)}),2500)}
-  else if(o.t=='need'&&sent[o.id]&&Array.isArray(o.miss))o.miss.forEach((i,k)=>setTimeout(()=>send({t:'chunk',id:o.id,i,n:sent[o.id].ps.length,d:sent[o.id].ps[i],ty:sent[o.id].ty}),k*50));
-  else if(o.t=='comp'&&o.s&&comp&&comp.pen==other()){comp=o.s;syncCtl();cdraw()}
-  else if(o.t=='next'){caps.a=caps.b=null;comp=o.s;K.shot=null;$c('cPv').hidden=true;setP(cstream?'camera':'connected');syncCtl();cdraw()}}}
-function admit(f){K.partner=f;$c('cKnock').innerHTML='';send({t:'admit',to:f,nm:K.nm,comp});setP('connected');refresh()}
-const LBL={waiting:'⏳ Waiting',connected:'🔗 Connected',camera:'📷 Camera ready',captured:'✅ Photo captured'};
-function peersChanged(ch){if(!K.r)return;const ps=K.r.peers();let h='';for(const l of['host','guest']){const p=ps.find(x=>x.presence.role==l);h+=`<div class="card"><b>${esc(l=='host'?(K.nm[0]||'Host'):(K.nm[1]||'Partner'))}${p&&p.isMe?' (you)':''}</b><br>${p?LBL[p.presence.st]||LBL.connected:'⏳ Waiting to join'}</div>`}$c('cSt').innerHTML=h;
- if(ch&&ch.left.some(p=>p.peer==partnerPeer())){toast('Your partner disconnected.');if(K.host)K.partner=null;else{K.admitted=0;K.hostPeer=null}refresh()}}
-function cleanup(msg){clearTimeout(K.kt);clearInterval(K.et);cstream&&cstream.getTracks().forEach(t=>t.stop());cstream=null;(K.off||[]).forEach(f=>f());K.off=[];K.r&&K.r.leave();K.r=null;K.admitted=0;K.partner=null;K.shot=null;caps.a=caps.b=null;imgs[cIdx]=null;rx={};sent={};$c('c1').hidden=true;$c('c0').hidden=false;$c('cKnock').innerHTML='';$c('cCamBox').hidden=true;$c('cPv').hidden=true;if(msg)toast(msg)}
-$c('cEnd').onclick=async()=>{if(K.host&&K.partner){await send({t:'end'});await wait(300)}cleanup('Session closed. Temporary photos were deleted — saved memories stay.')};
-$c('cRev').onclick=()=>{K.rev=1;toast('Invitation revoked.')};
-$c('cKick').onclick=()=>{if(!K.partner)return;send({t:'kick',to:K.partner});K.partner=null;K.rev=1;caps.b=null;refresh();toast('Partner removed and invitation revoked. End the session and start a new one to invite again.')};
-// camera + cutout
-$c('cCam').onclick=async()=>{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return toast('Camera isn’t supported on this device or connection (needs HTTPS).');try{cstream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:960},height:{ideal:1200}},audio:false});$c('cVid').srcObject=cstream;await $c('cVid').play();$c('cCamBox').hidden=false;setP('camera')}catch(e){toast(e.name=='NotAllowedError'?'Camera permission denied — allow it in your browser settings to join in.':'Couldn’t open the camera: '+e.message)}};
-$c('cSnap').onclick=async()=>{const cd=$c('cCd'),v=$c('cVid');for(let k=+$c('cTm').value;k>0;k--){cd.textContent=k;cd.hidden=false;await wait(1000)}cd.hidden=true;const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;const x=c.getContext('2d');x.translate(c.width,0);x.scale(-1,1);x.drawImage(v,0,0);K.raw=c;pv()};
-function cut(src,tol){const k=Math.min(1,520/Math.max(src.width,src.height)),w=Math.round(src.width*k),h=Math.round(src.height*k),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(src,0,0,w,h);const d=x.getImageData(0,0,w,h),p=d.data;let r=0,g=0,b=0,n=0;const add=i=>{r+=p[i];g+=p[i+1];b+=p[i+2];n++};for(let i=0;i<w;i++){add(i*4);add(((h-1)*w+i)*4)}for(let j=0;j<h;j++){add(j*w*4);add((j*w+w-1)*4)}r/=n;g/=n;b/=n;
- const T=tol*tol,seen=new Uint8Array(w*h),q=[],near=i=>{const dr=p[i*4]-r,dg=p[i*4+1]-g,db=p[i*4+2]-b;return dr*dr+dg*dg+db*db<T},ps=i=>{if(!seen[i]&&near(i)){seen[i]=1;q.push(i)}};
- for(let i=0;i<w;i++){ps(i);ps((h-1)*w+i)}for(let j=0;j<h;j++){ps(j*w);ps(j*w+w-1)}
- while(q.length){const i=q.pop(),x0=i%w,y0=(i/w)|0;if(x0>0)ps(i-1);if(x0<w-1)ps(i+1);if(y0>0)ps(i-w);if(y0<h-1)ps(i+w)}
- let cnt=0;const e=[];for(let i=0;i<w*h;i++)if(seen[i]){p[i*4+3]=0;cnt++}else if(i>w&&i<w*h-w&&(seen[i-1]||seen[i+1]||seen[i-w]||seen[i+w]))e.push(i);e.forEach(i=>p[i*4+3]=130);x.putImageData(d,0,0);c.frac=cnt/(w*h);return c}
-function pv(){if(!K.raw)return;const c=$c('cCut').checked?cut(K.raw,+$c('cTol').value):K.raw,p=$c('cPrev'),k=Math.min(1,300/c.width);p.width=c.width*k;p.height=c.height*k;p.getContext('2d').drawImage(c,0,0,p.width,p.height);K.shot=c;$c('cPv').hidden=false;if(c.frac>.9)toast('The cutout removed almost everything — lower the strength or turn it off.')}
-$c('cCut').onchange=$c('cTol').onchange=pv;$c('cRe').onclick=()=>{K.raw=K.shot=null;$c('cPv').hidden=true;$c('cOk').checked=false};
-async function sendImg(c){const id=Math.random().toString(36).slice(2,8);let s=520,b;for(;;){const t=document.createElement('canvas'),k=Math.min(1,s/Math.max(c.width,c.height));t.width=Math.round(c.width*k);t.height=Math.round(c.height*k);t.getContext('2d').drawImage(c,0,0,t.width,t.height);b=await new Promise(r=>t.toBlob(r,'image/webp',.82));if(b.size<95e3||s<200)break;s*=.8}
- const d=b64(new Uint8Array(await b.arrayBuffer())),n=Math.ceil(d.length/2200),ps=[];for(let i=0;i<n;i++)ps.push(d.slice(i*2200,(i+1)*2200));sent[id]={ps,ty:b.type};for(let i=0;i<n;i++){await send({t:'chunk',id,i,n,d:ps[i],ty:b.type});await wait(45)}}
-$c('cSend').onclick=async()=>{if(!K.shot)return;if(!$c('cOk').checked)return toast('Please confirm you agree to share this photo with your partner.');if(!partnerPeer())return toast('Wait until your partner is connected.');caps[K.mine]=K.shot;setP('captured');cdraw();toast('Sending…');await sendImg(K.shot);toast('Photo sent 💗')};
-// composition
-function compose(){const c=document.createElement('canvas');c.width=528;c.height=540;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,528,540);g.addColorStop(0,BG[comp.bg][0]);g.addColorStop(1,BG[comp.bg][1]);x.fillStyle=g;x.fillRect(0,0,528,540);x.globalAlpha=.35;x.font='26px serif';x.textAlign='center';for(let i=0;i<14;i++)x.fillText(i%3?'💗':'✨',(i*97)%500+14,(i*53)%480+30);x.globalAlpha=1;
- for(const k of['a','b']){const im=caps[k];if(!im)continue;const[px,py,s]=comp[k],h=400*s,w=h*im.width/im.height,cx=px*528,by=py*540;x.save();if(comp.sh){x.fillStyle='rgba(0,0,0,.22)';x.shadowColor='rgba(0,0,0,.35)';x.shadowBlur=16;x.beginPath();x.ellipse(cx,by,w*.38,h*.035,0,0,7);x.fill();x.shadowOffsetY=6}x.drawImage(im,cx-w/2,by-h,w,h);x.restore()}
- imgs[cIdx]=c}
-function cdraw(){if(!comp||$c('cComp').hidden)return;compose();cs={...newSt(),f:comp.f,cap:comp.cap,label:comp.lab,date:comp.dt,names:[K.nm[0]||'',K.nm[1]||''],slots:[{...blank(),im:cIdx}],stk:comp.stk.map(([v,x,y,s])=>({t:'e',v,x,y,s,r:0}))};render($c('cc').getContext('2d'),cs,1,0)}
-function syncCtl(){const w=$c('cWho').value,a=comp[w];$c('cx').value=a[0];$c('cy').value=a[1];$c('cz').value=a[2];$c('cBg').value=comp.bg;$c('cSh').checked=!!comp.sh;$c('cCap').value=comp.cap;$c('cLab').value=comp.lab;$c('cDt').value=comp.dt;$c('cCtl').disabled=comp.pen!=K.mine;$c('cPen').textContent=comp.pen==K.mine?'✏️ It’s your turn to edit.':'⏳ '+(K.nm[comp.pen=='a'?0:1]||'Your partner')+' is editing — you’ll get the pen when they pass it.';$c('cWho').options[0].text=K.nm[0]||'Partner A';$c('cWho').options[1].text=K.nm[1]||'Partner B'}
-function upd(fn){if(!comp||comp.pen!=K.mine)return;fn();cdraw();clearTimeout(K.ct);K.ct=setTimeout(()=>send({t:'comp',s:comp}),150)}
-$c('cWho').onchange=syncCtl;
-[['cx',()=>comp[$c('cWho').value][0]=+$c('cx').value],['cy',()=>comp[$c('cWho').value][1]=+$c('cy').value],['cz',()=>comp[$c('cWho').value][2]=+$c('cz').value],['cBg',()=>comp.bg=+$c('cBg').value],['cSh',()=>comp.sh=$c('cSh').checked?1:0],['cCap',()=>comp.cap=$c('cCap').value],['cLab',()=>comp.lab=$c('cLab').value],['cDt',()=>comp.dt=$c('cDt').value]].forEach(([i,f])=>$c(i).oninput=()=>upd(f));
-$c('cFp').onclick=()=>upd(()=>comp.f=(comp.f+F.length-1)%F.length);$c('cFn').onclick=()=>upd(()=>comp.f=(comp.f+1)%F.length);
-['💗','✨','☁️','✈️','🌸','⭐','💌'].forEach(e=>{const b=document.createElement('button');b.className='sk';b.textContent=e;b.onclick=()=>upd(()=>{if(comp.stk.length<12)comp.stk.push([e,60+Math.random()*480|0,60+Math.random()*440|0,64])});$c('cEmo').append(b)});
-$c('cPass').onclick=()=>{if(comp.pen!=K.mine)return toast('You don’t have the pen right now.');comp.pen=other();syncCtl();send({t:'comp',s:comp})};
-const asC=async fn=>{const t=st;st=cs;try{await fn()}finally{st=t}};
-$c('cDl').onclick=()=>cs&&asC(()=>$('#dl').onclick());$c('cSv').onclick=()=>cs&&asC(()=>$('#sv').onclick());
-$c('cEd').onclick=()=>{if(!cs)return;push();const cp=document.createElement('canvas');cp.width=528;cp.height=540;cp.getContext('2d').drawImage(imgs[cIdx],0,0);imgs.push(cp);st=JSON.parse(JSON.stringify(cs));st.slots=[{...blank(),im:imgs.length-1}];sel=null;sync();location.hash='booth'};
-$c('cNext').onclick=()=>{if(!partnerPeer())return;const p=comp.pen;comp=newComp();comp.pen=p;caps.a=caps.b=null;K.shot=K.raw=null;$c('cPv').hidden=true;$c('cOk').checked=false;setP(cstream?'camera':'connected');send({t:'next',s:comp});syncCtl();cdraw()};
-{const q=new URLSearchParams(location.search).get('join')||new URLSearchParams(location.hash.slice(1)).get('join');if(q){$c('cCode').value=q;location.hash='collab'}}
-</script></body></html>
+    [hidden] {
+      display: none !important
+    }
+
+    body {
+      margin: 0;
+      font: 500 16px Quicksand, sans-serif;
+      background-color: var(--bg);
+      background-image:
+        linear-gradient(to right, color-mix(in srgb, var(--line) 45%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in srgb, var(--line) 45%, transparent) 1px, transparent 1px);
+      background-size: 36px 36px;
+      color: var(--ink);
+    }
+
+    h1,
+    h2,
+    .hand {
+      font-family: Pacifico, cursive;
+      font-weight: 400
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 18px;
+      padding: 10px 18px;
+      background: var(--cd);
+      border-bottom: 3px dashed var(--pk)
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font: 22px Pacifico, cursive;
+      color: var(--p2);
+      text-decoration: none
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px
+    }
+
+    nav a {
+      padding: 6px 12px;
+      border-radius: 99px;
+      color: var(--dk);
+      text-decoration: none;
+      font-weight: 700;
+      transition: .2s
+    }
+
+    nav a:hover,
+    nav a.on {
+      background: var(--pk);
+      transform: translateY(-2px)
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 18px
+    }
+
+    button,
+    .btn,
+    select,
+    input,
+    textarea {
+      font: inherit;
+      color: var(--dk)
+    }
+
+    button,
+    .btn {
+      background: var(--pk);
+      border: 2px solid var(--dk);
+      border-radius: 99px;
+      padding: 8px 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: .2s
+    }
+
+    button:hover,
+    .btn:hover {
+      transform: translateY(-2px) rotate(-1deg);
+      background: var(--p2);
+      color: #fff
+    }
+
+    .big {
+      font-size: 20px;
+      padding: 14px 30px;
+      background: var(--p2);
+      color: #fff
+    }
+
+    input,
+    select,
+    textarea {
+      background: var(--cd);
+      border: 2px solid var(--pk);
+      border-radius: 14px;
+      padding: 7px 10px;
+      max-width: 100%
+    }
+
+    input[type=color] {
+      padding: 0;
+      width: 40px;
+      height: 34px
+    }
+
+    input[type=range] {
+      padding: 0;
+      accent-color: var(--p2)
+    }
+
+    .hero {
+      text-align: center;
+      padding: 50px 10px;
+      background: linear-gradient(#ffd6e3, #fff0f5);
+      border-radius: 32px;
+      position: relative;
+      overflow: hidden;
+      color: #3b2a35
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 7vw, 64px);
+      margin: 0 0 6px;
+      color: #e8466f
+    }
+
+    .hero p {
+      font-size: 20px
+    }
+
+    .fl {
+      position: absolute;
+      font-size: 34px;
+      animation: fl 6s ease-in-out infinite;
+      opacity: .8
+    }
+
+    @keyframes fl {
+      50% {
+        transform: translateY(-22px) rotate(12deg)
+      }
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin: 8px 0
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .chip {
+      background: var(--cd);
+      border: 2px solid var(--pk);
+      border-radius: 99px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-weight: 700
+    }
+
+    .chip:hover {
+      background: var(--pk)
+    }
+
+    .booth {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 400px;
+      gap: 18px;
+      align-items: start
+    }
+
+    @media(max-width:900px) {
+      .booth {
+        grid-template-columns: 1fr
+      }
+    }
+
+    .stage {
+      text-align: center;
+      position: sticky;
+      top: 70px
+    }
+
+    @media(max-width:900px) {
+      .stage {
+        position: static
+      }
+    }
+
+    #cv {
+      max-width: 100%;
+      max-height: 72vh;
+      width: auto;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 8px 28px #0003;
+      touch-action: none;
+      cursor: grab;
+      background: #fff
+    }
+
+    .panel details {
+      background: var(--cd);
+      border: 2px solid var(--pk);
+      border-radius: 20px;
+      padding: 10px 14px;
+      margin-bottom: 10px
+    }
+
+    summary {
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 18px
+    }
+
+    .vw {
+      position: relative;
+      max-width: 100%
+    }
+
+    video {
+      width: 100%;
+      border-radius: 16px;
+      background: #000;
+      max-height: 300px
+    }
+
+    #cd {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      font: 120px Pacifico, cursive;
+      color: #fff;
+      text-shadow: 0 0 20px #e8466f
+    }
+
+    .fg {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+      max-height: none
+    }
+
+    .panel .fg {
+      max-height: 340px;
+      overflow: auto
+    }
+
+    .fi {
+      position: relative;
+      background: var(--cd);
+      border: 2px solid var(--pk);
+      border-radius: 14px;
+      padding: 6px;
+      text-align: center;
+      cursor: pointer;
+      transition: .2s;
+      font-size: 12px
+    }
+
+    .fi:hover,
+    .fi.on {
+      transform: scale(1.05);
+      border-color: var(--p2)
+    }
+
+    .fi canvas {
+      width: 100%;
+      height: auto;
+      border-radius: 6px
+    }
+
+    .hb {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      padding: 0 7px;
+      border: 0;
+      background: #fffc;
+      color: #e8466f
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 14px
+    }
+
+    .card {
+      background: var(--cd);
+      border: 2px solid var(--pk);
+      border-radius: 20px;
+      padding: 14px
+    }
+
+    .card img {
+      width: 100%;
+      border-radius: 10px
+    }
+
+    .sk {
+      font-size: 28px;
+      padding: 2px 8px
+    }
+
+    .hint,
+    small {
+      color: var(--mu)
+    }
+
+    #toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      background: var(--dk);
+      color: var(--bg);
+      padding: 10px 18px;
+      border-radius: 99px;
+      z-index: 20;
+      max-width: 90vw
+    }
+  </style>
+</head>
+
+<body>
+  <header><a class="logo" href="#home"><svg width="38" height="38" viewBox="0 0 40 40">
+        <rect x="3" y="10" width="34" height="24" rx="7" fill="#3b2a35" />
+        <rect x="13" y="6" width="14" height="7" rx="3" fill="#3b2a35" />
+        <circle cx="20" cy="22" r="9" fill="#ffc2d4" />
+        <path d="M20 28c-6-4-7-8-4-10 2-1 3 0 4 1 1-1 2-2 4-1 3 2 2 6-4 10z" fill="#e8466f" />
+      </svg>LDR PhotoBooth</a>
+    <nav><a href="#home">Home</a><a href="#booth">PhotoBooth</a><a href="#gallery">Frames</a><a href="#ldr">LDR
+        Corner</a><a href="#collab">Live Collab</a><a href="#memories">Our Memories</a><a href="#about">About</a><a
+        href="#help">Help</a></nav>
+  </header>
+  <main>
+    <section id="home" data-p>
+      <div class="hero"><span class="fl" style="left:6%;top:18%">☁️</span><span class="fl"
+          style="left:88%;top:12%;animation-delay:1s">💖</span><span class="fl"
+          style="left:14%;top:72%;animation-delay:2s">⭐</span><span class="fl"
+          style="left:80%;top:70%;animation-delay:3s">✈️</span><span class="fl"
+          style="left:48%;top:6%;animation-delay:4s">💌</span>
+        <h1>LDR PhotoBooth</h1>
+        <p class="hand" style="font-size:26px">Capture Moments, Closer Even from Afar.</p>
+        <p>Snap photos, pick from 120 hand-built frames, add stickers, and keep your memories together — even when
+          you’re miles apart.</p><a class="btn big" href="#booth">📸 Start Photobooth</a>
+      </div>
+      <h2>Featured frames</h2>
+      <div class="fg" id="feat"></div>
+      <h2>Popular categories</h2>
+      <div class="chips" id="cats"></div>
+    </section>
+
+    <section id="booth" data-p hidden>
+      <div class="booth">
+        <div class="stage"><canvas id="cv"></canvas>
+          <div class="row" style="justify-content:center"><button id="undo">↩ Undo</button><button id="redo">↪
+              Redo</button><button id="reset">Reset</button><button id="del">🗑 Remove sticker</button></div>
+          <div class="row" style="justify-content:center"><label>Size/zoom <input type="range" id="sz" min=".5" max="4"
+                step=".01" value="1"></label><label>Rotate <input type="range" id="rot" min="-180" max="180"
+                value="0"></label></div>
+          <div class="row" style="justify-content:center"><button id="retake">Retake slot</button><button id="mvl">◀
+              Earlier</button><button id="mvr">Later ▶</button></div>
+          <p class="hint">Tap a photo or sticker, drag to move, use the sliders or mouse wheel to zoom and rotate.</p>
+        </div>
+        <div class="panel">
+          <details open>
+            <summary>📸 Photos</summary>
+            <div class="row"><select id="lay">
+                <option value="single">Single photo</option>
+                <option value="duo">2-photo layout</option>
+                <option value="trio">3-photo layout</option>
+                <option value="quad">4-photo grid</option>
+                <option value="strip">Classic photobooth strip</option>
+                <option value="split">Split / side-by-side (LDR)</option>
+              </select></div>
+            <div class="row"><button id="cam">🎥 Start camera</button><button id="flip">🔄 Front/back</button><select
+                id="timer">
+                <option>3</option>
+                <option>5</option>
+                <option>10</option>
+              </select>s</div>
+            <div id="camBox" hidden>
+              <div class="vw"><video id="vid" playsinline muted></video>
+                <div id="cd" hidden></div>
+              </div>
+              <div class="row"><button id="snap">📷 Snap</button><button id="auto">✨ Auto-shoot all slots</button></div>
+            </div>
+            <div class="row"><label class="btn">🖼 Upload photos<input id="up" type="file" accept="image/*" multiple
+                  hidden></label></div>
+            <label class="row"><input type="checkbox" id="sess"> Virtual session: take turns <b
+                id="turnlab"></b></label>
+          </details>
+          <details>
+            <summary>🖼 Frames (120)</summary>
+            <div id="bb"></div>
+          </details>
+          <details>
+            <summary>💌 Names, captions &amp; dates</summary>
+            <div class="row"><input id="n1" placeholder="Partner A nickname"><input id="n2"
+                placeholder="Partner B nickname"></div>
+            <div class="row"><input id="cap" placeholder="Caption (blank = frame’s own)" style="width:100%"></div>
+            <div class="row"><input id="msg" placeholder="Custom message" style="width:100%"></div>
+            <div class="row"><input id="lab" placeholder="Label e.g. 8,400 km apart"><input id="dt" type="date"></div>
+            <div class="row"><label>Frame color <input type="color" id="col" value="#e8466f"></label><label>Background
+                <input type="color" id="bgc" value="#ffe3ea"></label><button id="cx">↺ Auto colors</button></div>
+            <div class="row"><label>Matching version <select id="pair">
+                  <option value="0">Partner A</option>
+                  <option value="1">Partner B</option>
+                </select></label></div>
+            <div class="row"><label class="btn">⬆ Upload transparent PNG frame<input id="ovf" type="file"
+                  accept="image/png" hidden></label><button id="ovx">Remove</button></div>
+          </details>
+          <details>
+            <summary>🎀 Stickers &amp; text</summary>
+            <div class="row" id="emo"></div>
+            <div class="row"><input id="tt" placeholder="Text sticker"><select id="tf">
+                <option value="Pacifico,cursive">Pacifico</option>
+                <option value="'Patrick Hand',cursive">Handwritten</option>
+                <option value="Quicksand,sans-serif">Rounded</option>
+                <option value="Georgia,serif">Serif</option>
+                <option value="monospace">Mono</option>
+              </select><input type="color" id="tc" value="#e8466f"><input type="number" id="ts" value="56" min="16"
+                max="200" style="width:70px"><button id="tadd">Add text</button></div>
+            <div class="row"><label class="btn">⬆ Upload PNG sticker<input id="upk" type="file" accept="image/*"
+                  hidden></label></div>
+          </details>
+          <details open>
+            <summary>⬇ Save &amp; share</summary>
+            <div class="row"><select id="fmt">
+                <option value="png">PNG (best)</option>
+                <option value="jpeg">JPEG</option>
+              </select><button id="dl" class="big" style="padding:10px 22px">Download</button></div>
+            <div class="row"><input id="mt" placeholder="Photo title"><button id="sv">💾 Save to Our
+                Memories</button><button id="sh">🔗 Share</button></div>
+            <small>No watermarks. Saved memories stay private on this device.</small>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section id="gallery" data-p hidden>
+      <h2>Frame Gallery</h2>
+      <div id="gb"></div>
+    </section>
+
+    <section id="ldr" data-p hidden>
+      <h2>LDR Corner 💌</h2>
+      <p><a class="btn big" href="#collab">Invite Your Partner 💌</a></p>
+      <p>Made for two people in two places. Pick a caption, then jump into the booth.</p>
+      <div class="chips" id="caps"></div>
+      <div class="cards" style="margin:16px 0">
+        <div class="card">
+          <h3>Split layout</h3>
+          <p>Each partner places their own photo side by side.</p><button id="gs">Open split booth</button>
+        </div>
+        <div class="card">
+          <h3>Turn-taking session</h3>
+          <p>Pass the camera: you and your partner take turns filling a shared strip. Photos get name tags.</p><button
+            id="gt">Start session</button>
+        </div>
+        <div class="card">
+          <h3>Matching frames</h3>
+          <p>Both of you use the same frame — one picks “Partner A”, the other “Partner B” (colors swap). Send each
+            other your halves and combine in a split layout.</p><button id="gm">Go to booth</button>
+        </div>
+      </div>
+      <h3>Distance &amp; matching frames</h3>
+      <div id="lb"></div>
+    </section>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <section id="collab" data-p hidden>
+      <style>
+        .cg {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+          gap: 16px
+        }
+
+        @media(max-width:800px) {
+          .cg {
+            grid-template-columns: 1fr
+          }
+        }
+
+        #cPrev {
+          max-width: 100%;
+          background: repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 0 0/20px 20px;
+          border-radius: 12px
+        }
+
+        #cc {
+          max-width: 100%;
+          max-height: 70vh;
+          border-radius: 12px;
+          box-shadow: 0 8px 28px #0003
+        }
+
+        fieldset {
+          border: 0;
+          padding: 0;
+          margin: 0
+        }
+
+        .qr img {
+          width: 170px;
+          height: 170px;
+          border-radius: 12px;
+          background: #fff;
+          padding: 6px
+        }
+
+        .code {
+          font: 700 20px monospace;
+          word-break: break-all
+        }
+      </style>
+      <h2>Live Camera Collab 💌</h2>
+      <div id="cNo" class="card" hidden><b>Live rooms aren’t available in this view.</b>
+        <p>Couldn’t reach the connection service (PeerJS signaling) or this network blocks it. Check your connection and
+          try again. Nothing is simulated here.</p>
+      </div>
+      <div id="c0">
+        <p>Each of you uses your own camera, in your own place, and we combine you into one picture. No gallery uploads
+          needed.</p>
+        <div class="row"><button class="big" id="cInv">Invite Your Partner 💌</button></div>
+        <div class="row"><input id="cN1" placeholder="Your nickname"><input id="cN2"
+            placeholder="Partner’s nickname"><label>Invite valid for <select id="cExp">
+              <option value="15">15 min</option>
+              <option value="60" selected>1 hour</option>
+              <option value="1440">24 hours</option>
+            </select></label></div>
+        <h3>Got an invitation?</h3>
+        <div class="row"><input id="cCode" placeholder="Paste invite code"><button id="cJoin">Join room</button></div>
+      </div>
+      <div id="c1" hidden>
+        <div id="cDis" class="card" hidden>⚠️ Connection lost, reconnecting…</div>
+        <p id="cInfo"></p>
+        <div id="cKnock"></div>
+        <div class="cg">
+          <div>
+            <div id="cInvP" class="card"><b id="cMsg"></b>
+              <div class="row">
+                <div class="qr" id="cQr"></div>
+                <div>
+                  <div>Session code</div>
+                  <div class="code" id="cCodeOut"></div><small id="cExpT"></small>
+                </div>
+              </div>
+              <div class="row"><input id="cLink" readonly style="flex:1;min-width:0"><button id="cCopy">Copy Invite
+                  Link</button><button id="cShare">Share Invitation</button></div>
+              <div class="row"><button id="cRev">Revoke invitation</button><button id="cKick">Remove partner</button>
+              </div><small>If the link doesn’t open the join screen, send the code instead.</small>
+            </div>
+            <div id="cSt" class="cards"></div><button id="cEnd">End / leave session</button>
+            <div id="cWork" hidden>
+              <h3>1 · Your camera</h3>
+              <div class="row"><button id="cCam">🎥 Start my camera</button></div>
+              <div id="cCamBox" hidden>
+                <div class="vw"><video id="cVid" playsinline muted style="transform:scaleX(-1)"></video>
+                  <div id="cCd"
+                    style="position:absolute;inset:0;display:grid;place-items:center;font:110px Pacifico,cursive;color:#fff;text-shadow:0 0 20px #e8466f"
+                    hidden></div>
+                </div>
+                <div class="row"><select id="cTm">
+                    <option>3</option>
+                    <option>5</option>
+                    <option>10</option>
+                  </select>s<button id="cSnap">📷 Snap</button></div>
+              </div>
+              <div id="cPv" hidden><canvas id="cPrev" width="10" height="10"></canvas>
+                <div class="row"><label><input type="checkbox" id="cCut" checked> Quick cutout (best on a plain
+                    background)</label><label>Strength <input type="range" id="cTol" min="20" max="140"
+                      value="70"></label></div>
+                <div class="row"><button id="cRe">Retake</button></div><label class="row"><input type="checkbox"
+                    id="cOk"> I agree to share this photo with my partner</label><button id="cSend" class="big"
+                  style="padding:10px 22px">Send to room 💗</button>
+              </div>
+            </div>
+          </div>
+          <div id="cComp" hidden>
+            <h3>2 · Together</h3>
+            <p id="cPen"></p><canvas id="cc" width="600" height="760"></canvas>
+            <fieldset id="cCtl">
+              <div class="row"><select id="cWho">
+                  <option value="a">Partner A</option>
+                  <option value="b">Partner B</option>
+                </select><label>←→ <input type="range" id="cx" min="0" max="1" step=".01"></label><label>↑↓ <input
+                    type="range" id="cy" min=".5" max="1" step=".01"></label><label>Size <input type="range" id="cz"
+                    min=".4" max="1.6" step=".01"></label></div>
+              <div class="row"><select id="cBg">
+                  <option value="0">Pink sky</option>
+                  <option value="1">Blue to blush</option>
+                  <option value="2">Midnight</option>
+                  <option value="3">Sunset</option>
+                  <option value="4">Lavender</option>
+                </select><label><input type="checkbox" id="cSh"> Shadows</label><button id="cFp">◀ Frame</button><button
+                  id="cFn">Frame ▶</button></div>
+              <div class="row" id="cEmo"></div>
+              <div class="row"><input id="cCap" placeholder="Caption"><input id="cLab"
+                  placeholder="Anniversary / label"><input id="cDt" type="date"></div>
+            </fieldset>
+            <div class="row"><button id="cPass">🖊 Pass the pen</button><button id="cDl">⬇ Download</button><button
+                id="cSv">💾 Save to Our Memories</button><button id="cEd">Open in full editor</button><button
+                id="cNext">Create Another Together</button></div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+    <section id="memories" data-p hidden>
+      <h2>Our Memories</h2>
+      <p class="hint">🔒 Guest mode: everything below is stored only in this browser. Nothing is public.</p>
+      <div class="cards" id="ml"></div>
+    </section>
+
+    <section id="about" data-p hidden>
+      <h2>About</h2>
+      <p>LDR PhotoBooth helps long-distance couples, friends and family make shared photo strips and keepsakes.
+        Everything runs in your browser: photos never leave your device unless you share them yourself.</p>
+      <h3>Hosting &amp; backend</h3>
+      <p>This is a static site: drop it on Netlify or Vercel for free. Cloud galleries, accounts and shareable links
+        need a backend (for example Supabase: auth + Postgres + storage with row-level security, or Firebase). Those
+        services have free tiers with storage and bandwidth limits — check current limits before launch. Real-time
+        remote sessions would additionally need WebRTC or a realtime channel.</p>
+    </section>
+
+    <section id="help" data-p hidden>
+      <h2>Help</h2>
+      <h3>Camera</h3>
+      <p>Press “Start camera” and allow access when your browser asks. If you blocked it, click the lock icon in the
+        address bar and allow the camera, or use Upload. Camera needs HTTPS.</p>
+      <h3>Upload</h3>
+      <p>Choose photos from your gallery (images up to 20 MB). They fill empty slots in order.</p>
+      <h3>Edit</h3>
+      <p>Tap a photo or sticker to select it, drag to move, use the sliders to zoom and rotate. “Retake slot” clears the
+        selected photo; Earlier/Later reorders.</p>
+      <h3>Download &amp; share</h3>
+      <p>Choose PNG or JPEG and Download. “Share” uses your device’s share sheet. “Save” keeps it in Our Memories on
+        this device.</p>
+    </section>
+  </main>
+  <div id="toast" hidden></div>
+  <script>
+    const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+    const LS = (k, d) => { try { return JSON.parse(localStorage.getItem('ldr_' + k)) ?? d } catch (e) { return d } }, SS = (k, v) => { try { localStorage.setItem('ldr_' + k, JSON.stringify(v)); return 1 } catch (e) { return 0 } };
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const wait = t => new Promise(r => setTimeout(r, t));
+    let tT; const toast = m => { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(tT); tT = setTimeout(() => t.hidden = true, 4000) };
+    const C = [
+      ['Love & Couple', '#ffe3ea', '#e8466f', '#ff9db5', '💖💕💘💞', 'Us, always|My person|Love you most|Better together|Two hearts, one story|Forever yours'],
+      ['Long Distance (LDR)', '#e6f0ff', '#4a6fd8', '#ff9db5', '✈️💌🗺️⭐', 'Miles apart, hearts together|I miss you|Until we meet again|You are my favorite person|Same sky, same stars|Counting days to you'],
+      ['Cute & Kawaii', '#fff0f7', '#ff5fa2', '#b9a6ff', '🧸🐰🍓☁️', 'Kawaii club|So fluffy|Cutie patootie|Sparkle time|Bunny hugs|Strawberry smiles'],
+      ['Pink & Pastel', '#ffe0ec', '#f06292', '#ffc2d4', '🌸🎀💗✨', 'Pink vibes|Cotton candy|Rosy day|Blush mood|Pastel dreams|Sweet as peach'],
+      ['Minimalist', '#fafafa', '#222222', '#999999', '◦·+', 'Simple|Just us|Us.|Less is more|Quiet moments|Together'],
+      ['Retro & Vintage', '#f6e7c8', '#a0522d', '#d98c4a', '☀️🌼📻🎞️', 'Good old days|Retro love|Vintage us|Groovy|Remember when|Classic duo'],
+      ['Film Camera', '#222222', '#f5d76e', '#ffffff', '🎞️📷', 'Roll 01|Kodak moment|35mm memories|Developed with love|Frame by frame|Exposure: us'],
+      ['Polaroid', '#fffdf8', '#555555', '#e8a0b4', '📌🌿', 'Polaroid day|Snap!|Instant us|Shake it|Memory print|Dear moment'],
+      ['Anime & Cartoon', '#e8f6ff', '#ff6b9d', '#5ec8ff', '💥⚡🌟💫', 'Episode 01|Main characters|Plot twist: love|Power duo|Sparkle!|Best arc ever'],
+      ['Birthday', '#fff3d6', '#ff8a3d', '#ff6fb1', '🎂🎈🎉🎁', 'Happy birthday!|Another year cuter|Make a wish|Party time|Cake o’clock|Birthday bestie'],
+      ['Anniversary', '#fbe9f0', '#b5365f', '#e0a96d', '🥂💍🌹💝', 'Happy anniversary|Another year of us|Still choosing you|Our day|Cheers to us|Years of love'],
+      ['Valentine’s Day', '#ffd9e2', '#d81b60', '#ff80ab', '💌🌹💘😘', 'Be mine|Cupid’s pick|Roses & you|Valentine me|XOXO|Love letter'],
+      ['Christmas & Seasonal', '#e8f5e9', '#c62828', '#2e7d32', '🎄⛄❄️🎅', 'Merry & bright|Cozy winter|Snow much love|Jingle all the way|Santa’s list|Warm wishes'],
+      ['Friendship', '#fff6d8', '#f9a825', '#4fc3f7', '🌈👯🤝⭐', 'Besties|Squad goals|Friends forever|Partners in crime|Ride or die|Soul sisters'],
+      ['Funny & Meme', '#fff9c4', '#ff5722', '#7e57c2', '😂💀🤡🔥', 'No thoughts, just us|Certified chaos|Cringe but cute|Mood.|We tried|Send help'],
+      ['K-Pop Inspired', '#f1e6ff', '#8e44ff', '#ff4fa0', '💜🎤✨🪩', 'Comeback era|Bias wrecker|Fan meeting|Stage lights|Photocard mood|Encore!'],
+      ['Black & White', '#ffffff', '#111111', '#777777', '▪▫✦', 'Monochrome|Noir love|Classic|Timeless|Ink & light|Black tie'],
+      ['Aesthetic Scrapbook', '#f3e5d0', '#7b5e3b', '#e07a8c', '📎🌿✂️🖍️', 'Memory lane|Scrap it|Little notes|Pressed flowers|Journal day|Taped in'],
+      ['Matching Couple', '#ffe8f0', '#e91e63', '#3f8cff', '🧩💑🔗', 'Puzzle piece|Perfect match|Half of whole|Linked hearts|Mirror me|Two of a kind'],
+      ['Custom Style', '#f0eaff', '#7c4dff', '#ffb74d', '🖼️🎨✏️', 'Make it yours|Draw your own|Your style|DIY frame|Blank canvas|My design']];
+    const F = []; C.forEach((c, ci) => c[5].split('|').forEach((cap, v) => { const dk = ci == 6 || (v == 4 && ci % 3 == 0) ? 1 : 0; F.push({ id: F.length, cat: ci, cap, bg: dk ? (ci == 6 ? c[1] : '#2b2030') : c[1], a: dk && ci != 6 ? c[3] : c[2], b: c[3], e: c[4].match(/\p{Extended_Pictographic}\uFE0F?|./gu), pat: (v + ci) % 6, bd: (ci * 3 + v * 5) % 8, dk }) }));
+    const L = { single: [600, 760, [[36, 36, 528, 540]]], duo: [600, 1100, [[36, 36, 528, 460], [36, 508, 528, 460]]], trio: [600, 1400, [0, 1, 2].map(i => [36, 36 + i * 388, 528, 376])], quad: [600, 800, [[36, 36, 258, 258], [306, 36, 258, 258], [36, 306, 258, 258], [306, 306, 258, 258]]], strip: [360, 1360, [0, 1, 2, 3].map(i => [36, 24 + i * 276, 288, 264])], split: [1100, 660, [[36, 36, 500, 470], [564, 36, 500, 470]]] };
+    const blank = () => ({ im: -1, ox: 0, oy: 0, z: 1, r: 0 });
+    const newSt = () => ({ layout: 'single', f: 0, slots: [blank()], stk: [], names: ['', ''], cap: '', msg: '', date: '', label: '', pair: 0, col: '', bgc: '', ov: -1, sess: 0, turn: 0 });
+    let st = newSt(), imgs = [], sel = null, hist = [], redo = [], drag = null;
+    const mx = document.createElement('canvas').getContext('2d');
+    function sbox(k) { if (k.t == 'i') { const m = imgs[k.im]; return [k.s, k.s * m.height / m.width] } mx.font = k.t == 'e' ? `${k.s}px serif` : `${k.s}px ${k.f}`; return [mx.measureText(k.v).width, k.s * 1.2] }
+    function render(x, s, sc, ui) {
+      const [W, H, S] = L[s.layout], f = F[s.f], dk = f.dk; let a = s.col || f.a, b = f.b; if (+s.pair) [a, b] = [b, a];
+      const bg = s.bgc || f.bg, tx = dk ? '#fff7ee' : a, ink = dk ? '#fff7ee' : '#3b2a35';
+      x.setTransform(sc, 0, 0, sc, 0, 0); x.clearRect(0, 0, W, H); x.fillStyle = bg; x.fillRect(0, 0, W, H); x.textAlign = 'center'; x.textBaseline = 'middle';
+      x.save(); x.globalAlpha = .14; x.fillStyle = x.strokeStyle = dk ? '#fff' : a; const p = f.pat;
+      if (p == 1) for (let i = 0; i < W; i += 40)for (let j = 0; j < H; j += 40) { x.beginPath(); x.arc(i + 20, j + 20, 4, 0, 7); x.fill() }
+      if (p == 2) { x.lineWidth = 10; for (let i = -H; i < W; i += 36) { x.beginPath(); x.moveTo(i, 0); x.lineTo(i + H, H); x.stroke() } }
+      if (p == 3) for (let i = 0; i * 40 < W; i++)for (let j = 0; j * 40 < H; j++)if ((i + j) % 2) x.fillRect(i * 40, j * 40, 40, 40);
+      if (p == 4) { for (let i = 0; i < W; i += 40)x.fillRect(i, 0, 2, H); for (let j = 0; j < H; j += 40)x.fillRect(0, j, W, 2) }
+      if (p == 5) { x.font = '34px serif'; for (let i = 0; i * 90 < W + 90; i++)for (let j = 0; j * 90 < H + 90; j++)x.fillText(f.e[(i + j) % f.e.length], i * 90 + (j % 2) * 45, j * 90) }
+      x.restore();
+      S.forEach((r, i) => {
+        const [rx, ry, rw, rh] = r, sl = s.slots[i] || blank(), im = imgs[sl.im]; x.save(); x.beginPath(); x.rect(rx, ry, rw, rh); x.clip();
+        if (im) { const k = Math.max(rw / im.width, rh / im.height) * sl.z; x.translate(rx + rw / 2 + sl.ox, ry + rh / 2 + sl.oy); x.rotate(sl.r * Math.PI / 180); x.drawImage(im, -im.width * k / 2, -im.height * k / 2, im.width * k, im.height * k) }
+        else { x.fillStyle = dk ? '#ffffff22' : '#ffffff99'; x.fillRect(rx, ry, rw, rh); x.fillStyle = b; x.globalAlpha = .7; x.font = Math.min(rw, rh) / 4 + 'px serif'; x.fillText('📷', rx + rw / 2, ry + rh / 2) }
+        x.restore();
+        if (s.sess && im && sl.by != null) { const t = s.names[sl.by] || (sl.by ? 'Partner B' : 'Partner A'); x.font = '700 22px Quicksand,sans-serif'; const w = x.measureText(t).width + 22; x.fillStyle = a; x.fillRect(rx + 8, ry + rh - 38, w, 28); x.fillStyle = '#fff'; x.fillText(t, rx + 8 + w / 2, ry + rh - 24) }
+        if (ui && sel && sel.t == 'p' && sel.i == i) { x.save(); x.strokeStyle = '#ff3d7f'; x.lineWidth = 4; x.setLineDash([12, 8]); x.strokeRect(rx + 2, ry + 2, rw - 4, rh - 4); x.restore() }
+      });
+      const ring = (inset, step, fn) => { const w = W - 2 * inset, h = H - 2 * inset, P = 2 * (w + h); for (let t = 0; t < P; t += step) { let u = t, px, py; if (u < w) { px = inset + u; py = inset } else if ((u -= w) < h) { px = W - inset; py = inset + u } else if ((u -= h) < w) { px = W - inset - u; py = H - inset } else { u -= w; px = inset; py = H - inset - u } fn(px, py, t) } };
+      x.save(); x.strokeStyle = x.fillStyle = a; const bd = f.bd;
+      if (bd == 0) { x.lineWidth = 20; x.strokeRect(10, 10, W - 20, H - 20) }
+      if (bd == 1) { x.lineWidth = 4; x.strokeRect(6, 6, W - 12, H - 12); x.strokeStyle = b; x.lineWidth = 6; x.strokeRect(18, 18, W - 36, H - 36) }
+      if (bd == 2) { x.lineWidth = 10; x.setLineDash([22, 14]); x.strokeRect(16, 16, W - 32, H - 32) }
+      if (bd == 3) { x.fillStyle = b; ring(14, 30, (px, py) => { x.beginPath(); x.arc(px, py, 13, 0, 7); x.fill() }); x.fillStyle = a; ring(14, 60, (px, py) => { x.beginPath(); x.arc(px, py, 6, 0, 7); x.fill() }) }
+      if (bd == 4) { x.fillStyle = '#111'; x.fillRect(0, 0, 30, H); x.fillRect(W - 30, 0, 30, H); x.fillStyle = dk ? '#f5d76e' : '#fff'; for (let j = 14; j < H; j += 44) { x.fillRect(8, j, 14, 20); x.fillRect(W - 22, j, 14, 20) } }
+      if (bd == 5) { x.strokeStyle = '#fff'; x.lineWidth = 32; x.strokeRect(16, 16, W - 32, H - 32); x.strokeStyle = b; x.lineWidth = 2; x.strokeRect(32, 32, W - 64, H - 64) }
+      if (bd == 6) ring(18, 22, (px, py) => { x.beginPath(); x.arc(px, py, 5, 0, 7); x.fill() });
+      if (bd == 7) { x.lineWidth = 12; x.strokeStyle = b; x.strokeRect(6, 6, W - 12, H - 12);[[0, 0, 1, 1], [W, 0, -1, 1], [0, H, 1, -1], [W, H, -1, -1]].forEach(([px, py, u, v]) => { x.beginPath(); x.moveTo(px, py); x.lineTo(px + u * 60, py); x.lineTo(px, py + v * 60); x.fill() }) }
+      x.restore();
+      let q = f.id * 9301 + 49297; const R = () => (q = (q * 9301 + 49297) % 233280) / 233280, step = 2 * (W + H - 72) / 12;
+      ring(18, step, (px, py, t) => { x.save(); x.translate(px, py); x.rotate(R() - .5); x.font = (24 + R() * 14) + 'px serif'; x.fillText(f.e[Math.round(t / step) % f.e.length], 0, 0); x.restore() });
+      const zy = Math.max(...S.map(r => r[1] + r[3])) + 14, zh = H - zy - 20, wmax = W - 2 * Math.min(110, W * .2);
+      x.font = Math.min(60, W * .08) + 'px serif'; x.fillText(f.e[0], W * .1, zy + zh / 2); x.fillText(f.e[1 % f.e.length], W * .9, zy + zh / 2);
+      const cap = s.cap || f.cap; let fs = Math.min(W * .09, 60); x.font = `${fs}px Pacifico,cursive`; while (x.measureText(cap).width > wmax && fs > 14) { fs -= 2; x.font = `${fs}px Pacifico,cursive` }
+      const nm = s.names[0] || s.names[1] ? `${s.names[0] || '…'} ♥ ${s.names[1] || '…'}` : '', dl = [s.label, s.date].filter(Boolean).join(' · ');
+      const ln = [[cap, `${fs}px Pacifico,cursive`, tx], [nm, `700 ${fs * .55}px Quicksand,sans-serif`, ink], [dl, `${fs * .5}px "Patrick Hand",cursive`, ink], [s.msg, `${fs * .5}px "Patrick Hand",cursive`, ink]].filter(l => l[0]), lh = zh / (ln.length + 1);
+      ln.forEach((l, i) => { x.font = l[1]; x.fillStyle = l[2]; x.fillText(l[0], W / 2, zy + lh * (i + 1), wmax) });
+      s.stk.forEach((k, i) => {
+        x.save(); x.translate(k.x, k.y); x.rotate(k.r * Math.PI / 180); if (k.t == 'i') { const m = imgs[k.im], h = k.s * m.height / m.width; x.drawImage(m, -k.s / 2, -h / 2, k.s, h) } else { x.font = k.t == 'e' ? `${k.s}px serif` : `${k.s}px ${k.f}`; x.fillStyle = k.c || '#000'; x.fillText(k.v, 0, 0) }
+        if (ui && sel && sel.t == 's' && sel.i == i) { const [w, h] = sbox(k); x.strokeStyle = '#ff3d7f'; x.lineWidth = 3; x.setLineDash([8, 6]); x.strokeRect(-w / 2 - 6, -h / 2 - 6, w + 12, h + 12) } x.restore()
+      });
+      if (s.ov >= 0 && imgs[s.ov]) x.drawImage(imgs[s.ov], 0, 0, W, H);
+    }
+    const cv = $('#cv');
+    function draw() { const [W, H] = L[st.layout], sc = Math.min(1.5, 900 / W); cv.width = W * sc; cv.height = H * sc; render(cv.getContext('2d'), st, sc, 1) }
+    function thumb(id) { const c = document.createElement('canvas'); c.width = 100; c.height = 127; render(c.getContext('2d'), { ...newSt(), f: id }, 1 / 6, 0); return c }
+    const push = () => { hist.push(JSON.stringify(st)); if (hist.length > 60) hist.shift(); redo = [] };
+    function sync() { $('#n1').value = st.names[0]; $('#n2').value = st.names[1]; $('#cap').value = st.cap; $('#msg').value = st.msg; $('#dt').value = st.date; $('#lab').value = st.label; $('#lay').value = st.layout; $('#pair').value = st.pair; $('#sess').checked = !!st.sess; turnlab() }
+    function turnlab() { $('#turnlab').textContent = st.sess ? '— next: ' + (st.names[st.turn] || (st.turn ? 'Partner B' : 'Partner A')) : '' }
+    function setLayout(k) { st.layout = k; const n = L[k][2].length; while (st.slots.length < n) st.slots.push(blank()); st.slots.length = n; sel = null; $('#lay').value = k; draw() }
+    function setFrame(id) { push(); st.f = id; SS('rec', [id, ...LS('rec', []).filter(i => i != id)].slice(0, 24)); draw(); B.bb && B.bb.rd() }
+    function undo() { if (!hist.length) return; redo.push(JSON.stringify(st)); st = JSON.parse(hist.pop()); sel = null; sync(); draw() }
+    $('#undo').onclick = undo; $('#redo').onclick = () => { if (!redo.length) return; hist.push(JSON.stringify(st)); st = JSON.parse(redo.pop()); sel = null; sync(); draw() };
+    $('#reset').onclick = () => { if (confirm('Reset everything in the editor?')) { push(); st = newSt(); sel = null; sync(); draw() } };
+    $('#lay').onchange = e => { push(); setLayout(e.target.value) };
+    [['n1', v => st.names[0] = v], ['n2', v => st.names[1] = v], ['cap', v => st.cap = v], ['msg', v => st.msg = v], ['dt', v => st.date = v], ['lab', v => st.label = v], ['col', v => st.col = v], ['bgc', v => st.bgc = v], ['pair', v => st.pair = +v]].forEach(([id, fn]) => { const e = $('#' + id); e.onfocus = e.onpointerdown = push; e.oninput = () => { fn(e.value); turnlab(); draw() } });
+    $('#cx').onclick = () => { push(); st.col = st.bgc = ''; draw() };
+    $('#sess').onchange = e => { push(); st.sess = e.target.checked ? 1 : 0; st.turn = 0; turnlab(); draw() };
+    const cur = () => sel && (sel.t == 'p' ? st.slots[sel.i] : st.stk[sel.i]);
+    function syncSel() { const z = $('#sz'), r = $('#rot'), o = cur(); if (!o) return; if (sel.t == 'p') { z.min = .5; z.max = 4; z.step = .01; z.value = o.z } else { z.min = 16; z.max = 500; z.step = 1; z.value = o.s } r.value = o.r }
+    $('#sz').onpointerdown = $('#rot').onpointerdown = push;
+    $('#sz').oninput = e => { const o = cur(); if (!o) return; o[sel.t == 'p' ? 'z' : 's'] = +e.target.value; draw() };
+    $('#rot').oninput = e => { const o = cur(); if (!o) return; o.r = +e.target.value; draw() };
+    $('#del').onclick = () => { if (sel && sel.t == 's') { push(); st.stk.splice(sel.i, 1); sel = null; draw() } else toast('Select a sticker first.') };
+    $('#retake').onclick = () => { if (sel && sel.t == 'p') { push(); st.slots[sel.i] = blank(); draw(); toast('Slot cleared — snap or upload to refill.') } else toast('Tap a photo slot first.') };
+    const mv = d => { if (!sel || sel.t != 'p') return toast('Tap a photo slot first.'); const j = sel.i + d; if (j < 0 || j >= st.slots.length) return; push();[st.slots[sel.i], st.slots[j]] = [st.slots[j], st.slots[sel.i]]; sel.i = j; draw() };
+    $('#mvl').onclick = () => mv(-1); $('#mvr').onclick = () => mv(1);
+    const pt = e => { const r = cv.getBoundingClientRect(), [W, H] = L[st.layout]; return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H } };
+    function hit(p) {
+      for (let i = st.stk.length - 1; i >= 0; i--) { const k = st.stk[i], a = -k.r * Math.PI / 180, dx = p.x - k.x, dy = p.y - k.y, ux = dx * Math.cos(a) - dy * Math.sin(a), uy = dx * Math.sin(a) + dy * Math.cos(a), [w, h] = sbox(k); if (Math.abs(ux) < w / 2 + 8 && Math.abs(uy) < h / 2 + 8) return { t: 's', i } }
+      const S = L[st.layout][2]; for (let i = S.length - 1; i >= 0; i--) { const [x, y, w, h] = S[i]; if (p.x >= x && p.x <= x + w && p.y >= y && p.y <= y + h) return { t: 'p', i } } return null
+    }
+    cv.onpointerdown = e => { const p = pt(e); sel = hit(p); const o = cur(); if (o) { push(); cv.setPointerCapture(e.pointerId); drag = sel.t == 'p' ? { p, a: o.ox, b: o.oy } : { p, a: o.x, b: o.y }; syncSel() } draw() };
+    cv.onpointermove = e => { if (!drag || !sel) return; const p = pt(e), o = cur(), dx = p.x - drag.p.x, dy = p.y - drag.p.y; if (sel.t == 'p') { o.ox = drag.a + dx; o.oy = drag.b + dy } else { o.x = drag.a + dx; o.y = drag.b + dy } draw() };
+    cv.onpointerup = cv.onpointercancel = () => drag = null;
+    cv.onwheel = e => { const o = cur(); if (!o) return; e.preventDefault(); const f = e.deltaY < 0 ? 1.05 : .95; if (sel.t == 'p') o.z = Math.min(4, Math.max(.5, o.z * f)); else o.s = Math.min(500, Math.max(16, o.s * f)); syncSel(); draw() };
+    // camera
+    let stream, facing = 'user', busy = 0; const vid = $('#vid');
+    async function startCam() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return toast('Camera isn’t supported on this device or connection (needs HTTPS). Try Upload instead.');
+      try { stream && stream.getTracks().forEach(t => t.stop()); stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 960 } }, audio: false }); vid.srcObject = stream; await vid.play(); vid.style.transform = facing == 'user' ? 'scaleX(-1)' : 'none'; $('#camBox').hidden = false }
+      catch (e) { toast(e.name == 'NotAllowedError' ? 'Camera permission denied. Allow it in your browser settings, or upload photos instead.' : e.name == 'NotFoundError' ? 'No camera found. Try Upload instead.' : 'Couldn’t open the camera: ' + e.message) }
+    }
+    $('#cam').onclick = startCam; $('#flip').onclick = () => { facing = facing == 'user' ? 'environment' : 'user'; stream ? startCam() : toast('Start the camera first.') };
+    function grab() { const c = document.createElement('canvas'); c.width = vid.videoWidth; c.height = vid.videoHeight; const x = c.getContext('2d'); if (facing == 'user') { x.translate(c.width, 0); x.scale(-1, 1) } x.drawImage(vid, 0, 0); return c }
+    function nextSlot() { if (sel && sel.t == 'p' && st.slots[sel.i].im < 0) return sel.i; const i = st.slots.findIndex(s => s.im < 0); return i >= 0 ? i : sel && sel.t == 'p' ? sel.i : 0 }
+    function place(c, i) { push(); imgs.push(c); const o = blank(); o.im = imgs.length - 1; if (st.sess) { o.by = st.turn; st.turn ^= 1; turnlab() } st.slots[i] = o; sel = { t: 'p', i }; syncSel(); draw() }
+    async function shoot(i) { const cd = $('#cd'); for (let k = +$('#timer').value; k > 0; k--) { cd.textContent = k; cd.hidden = false; await wait(1000) } cd.textContent = '📸'; await wait(250); cd.hidden = true; place(grab(), i) }
+    $('#snap').onclick = async () => { if (busy || !stream) return; busy = 1; await shoot(nextSlot()); busy = 0 };
+    $('#auto').onclick = async () => { if (busy || !stream) return; busy = 1; for (let i = 0; i < st.slots.length; i++) { await shoot(i); await wait(500) } busy = 0 };
+    function load(f, max) { return new Promise((ok, no) => { const u = URL.createObjectURL(f), im = new Image(); im.onload = () => { const k = Math.min(1, max / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(u); ok(c) }; im.onerror = () => no(); im.src = u }) }
+    async function files(list, cb) { for (const f of list) { if (!f.type.startsWith('image/') || f.size > 20e6) { toast(`“${f.name}” isn’t a supported image (max 20 MB).`); continue } try { cb(await load(f, 1600)) } catch (e) { toast('Couldn’t read ' + f.name + '.') } } }
+    $('#up').onchange = async e => { await files(e.target.files, c => place(c, nextSlot())); e.target.value = '' };
+    $('#upk').onchange = async e => { await files(e.target.files, c => { push(); imgs.push(c); const [W, H] = L[st.layout]; st.stk.push({ t: 'i', im: imgs.length - 1, x: W / 2, y: H / 2, s: 200, r: 0 }); sel = { t: 's', i: st.stk.length - 1 }; syncSel(); draw() }); e.target.value = '' };
+    $('#ovf').onchange = async e => { await files(e.target.files, c => { push(); imgs.push(c); st.ov = imgs.length - 1; draw() }); e.target.value = '' };
+    $('#ovx').onclick = () => { push(); st.ov = -1; draw() };
+    '💖🌸⭐🎀🧸🐰🐱🌙☁️✈️💌🗺️🍓✨🦋🌈🌹💕'.match(/\p{Extended_Pictographic}\uFE0F?/gu).forEach(e => { const b = document.createElement('button'); b.className = 'sk'; b.textContent = e; b.onclick = () => { push(); const [W, H] = L[st.layout]; st.stk.push({ t: 'e', v: e, x: W / 2 + (Math.random() - .5) * 120, y: H / 2 + (Math.random() - .5) * 120, s: 72, r: 0 }); sel = { t: 's', i: st.stk.length - 1 }; syncSel(); draw() }; $('#emo').append(b) });
+    $('#tadd').onclick = () => { const v = $('#tt').value.trim(); if (!v) return toast('Type some text first.'); push(); const [W, H] = L[st.layout]; st.stk.push({ t: 't', v, f: $('#tf').value, c: $('#tc').value, x: W / 2, y: H / 2, s: +$('#ts').value || 56, r: 0 }); sel = { t: 's', i: st.stk.length - 1 }; syncSel(); draw() };
+    // export
+    function out(sc, type, q) { const c = document.createElement('canvas'), [W, H] = L[st.layout]; c.width = W * sc; c.height = H * sc; render(c.getContext('2d'), st, sc, 0); return new Promise(r => c.toBlob(r, type, q)) }
+    const hq = () => L[st.layout][0] < 700 ? 3 : 2;
+    $('#dl').onclick = async () => { const t = $('#fmt').value, b = await out(hq(), 'image/' + t, .95); if (!b) return toast('Export failed — try a smaller layout.'); const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `ldr-photobooth.${t == 'png' ? 'png' : 'jpg'}`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 5000) };
+    $('#sv').onclick = async () => { const b = await out(1, 'image/jpeg', .75), u = await new Promise(r => { const f = new FileReader(); f.onload = () => r(f.result); f.readAsDataURL(b) }), m = LS('mem', []); m.unshift({ id: Date.now(), t: $('#mt').value || 'Untitled memory', c: st.cap || F[st.f].cap, d: st.date || new Date().toLocaleDateString(), u }); if (!SS('mem', m)) return toast('Browser storage is full — delete old memories or download instead.'); toast('Saved to Our Memories 💖') };
+    $('#sh').onclick = async () => { const b = await out(2, 'image/png'), f = new File([b], 'ldr-photobooth.png', { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f], title: $('#mt').value || 'LDR PhotoBooth' }) } catch (e) { } } else toast('Sharing isn’t available here — download it and send it directly. Shareable links need a backend (see About).') };
+    function mem() { const m = LS('mem', []); $('#ml').innerHTML = m.length ? m.map(o => `<div class="card"><img src="${o.u}" alt=""><b>${esc(o.t)}</b><p>${esc(o.c)}</p><small>${esc(o.d)} · 🔒 Private on this device</small><div class="row"><a class="btn" download="${esc(o.t)}.jpg" href="${o.u}">Download</a><button data-d="${o.id}">Delete</button></div></div>`).join('') : '<p>No memories yet — make one in the PhotoBooth!</p>' }
+    $('#ml').onclick = e => { const d = e.target.dataset.d; if (d && confirm('Delete this memory?')) { SS('mem', LS('mem', []).filter(o => o.id != d)); mem() } };
+    // frame browser
+    function browser(root, pick, only) {
+      root.innerHTML = `<div class="row"><input class="q" placeholder="Search frames…"><select class="cs"><option value="">All categories</option>${C.map((c, i) => `<option value="${i}">${c[0]}</option>`).join('')}</select><select class="tb"><option value="all">All</option><option value="fav">♥ Favorites</option><option value="rec">Recent</option></select><button class="rnd">🎲 Random</button></div><div class="fg"></div><div class="row"><button class="more">Load more</button></div>`;
+      const g = $('.fg', root), q = $('.q', root), cs = $('.cs', root), tb = $('.tb', root); let n = 24;
+      if (only) $$('option', cs).forEach(o => { if (o.value !== '' && !only.includes(+o.value)) o.remove() });
+      const list = () => { const fv = LS('fav', []), t = q.value.toLowerCase(); let r = F.filter(f => (!only || only.includes(f.cat)) && (cs.value === '' || f.cat == cs.value) && (f.cap + ' ' + C[f.cat][0]).toLowerCase().includes(t)); if (tb.value == 'fav') r = r.filter(f => fv.includes(f.id)); if (tb.value == 'rec') r = LS('rec', []).map(i => F[i]).filter(f => r.includes(f)); return r };
+      const rd = () => { const r = list(), fv = LS('fav', []); g.innerHTML = ''; r.slice(0, n).forEach(f => { const d = document.createElement('div'); d.className = 'fi' + (st.f == f.id ? ' on' : ''); d.append(thumb(f.id)); d.insertAdjacentHTML('beforeend', `<span>${esc(f.cap)}</span><button class="hb" title="Favorite">${fv.includes(f.id) ? '♥' : '♡'}</button>`); d.onclick = e => { if (e.target.classList.contains('hb')) { const a = LS('fav', []), i = a.indexOf(f.id); i < 0 ? a.push(f.id) : a.splice(i, 1); SS('fav', a); rd(); return } pick(f.id) }; g.append(d) }); if (!r.length) g.textContent = 'No frames found.'; $('.more', root).hidden = r.length <= n };
+      q.oninput = cs.onchange = tb.onchange = () => { n = 24; rd() }; $('.more', root).onclick = () => { n += 24; rd() };
+      $('.rnd', root).onclick = () => { const r = list(); if (r.length) pick(r[Math.floor(Math.random() * r.length)].id) };
+      rd(); return { rd, cat(i) { cs.value = i; n = 24; rd() } }
+    }
+    const B = {};
+    const goBooth = id => { setFrame(id); location.hash = 'booth' };
+    B.bb = browser($('#bb'), setFrame); B.gal = browser($('#gb'), goBooth); B.ldr = browser($('#lb'), goBooth, [1, 18]);
+    $('#feat').append(...[0, 13, 26, 32, 42, 51, 60, 66, 78, 90, 100, 110].map(i => { const d = document.createElement('div'); d.className = 'fi'; d.append(thumb(i)); d.insertAdjacentHTML('beforeend', '<span>' + esc(F[i].cap) + '</span>'); d.onclick = () => goBooth(i); return d }));
+    C.forEach((c, i) => { const b = document.createElement('span'); b.className = 'chip'; b.textContent = c[4].slice(0, 2).replace(/[^\p{Extended_Pictographic}]/gu, '') + ' ' + c[0]; b.onclick = () => { B.gal.cat(i); location.hash = 'gallery' }; $('#cats').append(b) });
+    C[1][5].split('|').concat(['Forever & a day', 'Long-distance, close at heart']).forEach(t => { const b = document.createElement('span'); b.className = 'chip'; b.textContent = '“' + t + '”'; b.onclick = () => { push(); st.cap = t; sync(); draw(); location.hash = 'booth' }; $('#caps').append(b) });
+    $('#gs').onclick = () => { push(); setLayout('split'); location.hash = 'booth' };
+    $('#gt').onclick = () => { push(); st.sess = 1; st.turn = 0; setLayout('strip'); sync(); location.hash = 'booth'; toast('Fill in both nicknames, then take turns snapping!') };
+    $('#gm').onclick = () => { B.ldr.cat(18); location.hash = 'booth' };
+    function show() { const ids = ['home', 'booth', 'gallery', 'ldr', 'collab', 'memories', 'about', 'help'], p = location.hash.slice(1), id = ids.includes(p) ? p : 'home'; $$('[data-p]').forEach(s => s.hidden = s.id != id); $$('nav a').forEach(a => a.classList.toggle('on', a.hash == '#' + id)); if (id == 'booth') draw(); if (id == 'memories') mem(); scrollTo(0, 0) }
+    addEventListener('hashchange', show); show();
+    ['20px Pacifico', '20px "Patrick Hand"', '700 20px Quicksand'].forEach(f => document.fonts.load(f).then(() => { draw(); B.bb.rd(); B.gal.rd() }));
+    // ---- Live collab (encrypted relay over the claude.ai room capability) ----
+    const A32 = '0123456789ABCDEFGHJKMNPQRSTVWXYZ', BASE = window.claude ? 'https://claude.ai/artifact/8xvdE3TkqQpxzmGwEj87YS' : 'https://photo-booth-ldr.vercel.app/', K = { mine: 'a', nm: ['', ''] }, caps = { a: null, b: null }, cIdx = imgs.push(null) - 1, $c = id => document.getElementById(id);
+    let comp, cs, cstream, sent = {}, rx = {};
+    const b32 = b => { let s = '', n = 0, v = 0; for (const x of b) { v = (v << 8) | x; n += 8; while (n >= 5) { s += A32[(v >>> (n - 5)) & 31]; n -= 5 } v &= (1 << n) - 1 } if (n) s += A32[(v << (5 - n)) & 31]; return s };
+    const unb32 = s => { let n = 0, v = 0; const o = []; for (const c of s) { const k = A32.indexOf(c); if (k < 0) return null; v = (v << 5) | k; n += 5; if (n >= 8) { o.push((v >>> (n - 8)) & 255); n -= 8; v &= (1 << n) - 1 } } return o.length >= 16 ? new Uint8Array(o.slice(0, 16)) : null };
+    const b64 = u => { let s = ''; for (let i = 0; i < u.length; i += 8192)s += String.fromCharCode.apply(null, u.subarray(i, i + 8192)); return btoa(s) }, ub64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+    const hex = u => [...u].map(x => x.toString(16).padStart(2, '0')).join('');
+    async function derive(sec) { const h = async t => new Uint8Array(await crypto.subtle.digest('SHA-256', new Uint8Array([...sec, ...new TextEncoder().encode(t)]))); K.code = b32(sec); K.rn = 'r' + hex((await h('room')).slice(0, 16)); K.key = await crypto.subtle.importKey('raw', await h('key'), 'AES-GCM', false, ['encrypt', 'decrypt']) }
+    async function enc(o) { const iv = crypto.getRandomValues(new Uint8Array(12)), ct = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, K.key, new TextEncoder().encode(JSON.stringify(o)))); const u = new Uint8Array(12 + ct.length); u.set(iv); u.set(ct, 12); return b64(u) }
+    async function dec(s) { try { const u = ub64(s); return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: u.slice(0, 12) }, K.key, u.slice(12)))) } catch (e) { return null } }
+    const send = async o => { try { await K.r.emit('m', { c: await enc(o) }) } catch (e) { } };
+    const me = () => (K.r.peers().find(p => p.sameTab) || {}).peer, other = () => K.mine == 'a' ? 'b' : 'a', partnerPeer = () => K.host ? K.partner : K.hostPeer;
+    const newComp = () => ({ bg: 0, sh: 1, a: [.3, .96, 1], b: [.7, .96, 1], f: 6, cap: '', lab: '', dt: '', stk: [], pen: 'a' });
+    const BG = [['#ffd6e3', '#fff0f5'], ['#d9e8ff', '#ffe3ea'], ['#2b1b3a', '#5b2a5a'], ['#ffe9c7', '#ffc2d4'], ['#e6dcff', '#f3e5ff']];
+    function setP(s) { K.st = s; K.r && K.r.presence({ role: K.host ? 'host' : 'guest', st: s }) }
+    const peerLib = () => window.Peer ? Promise.resolve({ join: peerRoom }) : new Promise(ok => { const s = document.createElement('script'); s.src = 'https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js'; s.onload = () => ok({ join: peerRoom }); s.onerror = () => ok(null); document.head.append(s) });
+    function peerRoom() {
+      return new Promise((ok, no) => {
+        const pr = new Peer(K.host ? K.rn : undefined), cn = [], pres = {}, mine = {}; let H = { m: [], p: [] }, id;
+        const list = () => [{ peer: id, presence: mine, isMe: true, sameTab: true }, ...cn.map(c => ({ peer: c.peer, presence: pres[c.peer] || {}, isMe: false, sameTab: false }))];
+        const fire = (j, l, u) => H.p.forEach(f => f({ peers: list(), joined: j || [], left: l || [], updated: u || [] })), bc = d => cn.forEach(c => c.send(d));
+        const room = { emit: async (t, d) => bc({ k: 'm', d }), on: (t, f) => { H.m.push(f); return () => { H.m = H.m.filter(x => x != f) } }, onPeers: f => { H.p.push(f); setTimeout(() => f({ peers: list(), joined: list(), left: [], updated: [] })); return () => { H.p = H.p.filter(x => x != f) } }, presence: async p => { Object.assign(mine, p); bc({ k: 'p', p: mine }); fire([], [], [list()[0]]) }, peers: list, onConnection: f => { setTimeout(() => f(true)); return () => { } }, leave: async () => { try { pr.destroy() } catch (e) { } } };
+        const wire = c => { cn.push(c); c.send({ k: 'p', p: mine }); fire([{ peer: c.peer, presence: {}, isMe: false, sameTab: false }]); c.on('data', m => { if (!m) return; if (m.k == 'm') H.m.slice().forEach(f => f({ peer: c.peer, isMe: false, sameTab: false, data: m.d })); else if (m.k == 'p' && m.p && typeof m.p == 'object') { pres[c.peer] = m.p; fire([], [], [list().find(x => x.peer == c.peer)]) } }); c.on('close', () => { const e = { peer: c.peer, presence: pres[c.peer] || {}, isMe: false, sameTab: false }, i = cn.indexOf(c); if (i >= 0) cn.splice(i, 1); delete pres[c.peer]; fire([], [e]) }) };
+        pr.on('error', e => no({ code: e.type, message: e.message }));
+        pr.on('open', i => { id = i; if (K.host) { pr.on('connection', c => c.on('open', () => wire(c))); ok(room) } else { const c = pr.connect(K.rn, { reliable: true }); c.on('open', () => { wire(c); ok(room) }); setTimeout(() => no({ code: 'peer-unavailable' }), 10000) } })
+      })
+    }
+    async function openRoom() {
+      let R = window.claude && await claude.use('room'); if (!R) R = await peerLib(); if (!R) { $c('cNo').hidden = false; return false } try { K.r = await R.join(K.rn) } catch (e) { toast(e.code == 'peer-unavailable' ? 'No host found: the code is invalid, the invitation has expired, or the host left.' : 'Couldn’t open the room (' + (e.code || e.message) + '). Try again.'); return false }
+      K.off = [K.r.on('m', onMsg), K.r.onPeers(peersChanged), K.r.onConnection(c => { clearTimeout(K.dt); if (!c) K.dt = setTimeout(() => $c('cDis').hidden = false, 2000); else $c('cDis').hidden = true })]; return true
+    }
+    function showLobby() { $c('c0').hidden = true; $c('c1').hidden = false; $c('cInvP').hidden = !K.host; refresh() }
+    function refresh() { const on = K.host ? !!K.partner : !!K.admitted; $c('cWork').hidden = !on; $c('cComp').hidden = !on; $c('cKick').hidden = !(K.host && K.partner); $c('cInfo').textContent = on ? 'You’re connected 💗 Take your photo, send it, then edit together.' : K.host ? 'Waiting for your partner to join…' : 'Knocking… waiting for the host to let you in 💌'; if (on && comp) { syncCtl(); cdraw() } }
+    async function startHost() { const sec = crypto.getRandomValues(new Uint8Array(16)); await derive(sec); Object.assign(K, { host: 1, mine: 'a', nm: [$c('cN1').value.trim() || 'Me', $c('cN2').value.trim() || 'My love'], exp: Date.now() + (+$c('cExp').value) * 6e4, rev: 0, partner: null, admitted: 0 }); if (!await openRoom()) return; comp = newComp(); setP('waiting'); showLobby(); const l = `${BASE}?join=${K.code}#join=${K.code}`; K.link = l; $c('cLink').value = l; $c('cCodeOut').textContent = K.code.match(/.{1,5}/g).join('-'); $c('cMsg').textContent = `Let’s take a photo together, even miles apart! 💗 — ${K.nm[0]}`; const q = window.qrcode && qrcode(0, 'M'); if (q) { q.addData(l); q.make(); $c('cQr').innerHTML = q.createImgTag(4, 8) } else $c('cQr').textContent = '(QR unavailable — use the code)'; clearInterval(K.et); K.et = setInterval(() => { $c('cExpT').textContent = K.rev ? 'Invitation revoked.' : K.partner ? 'Invitation used.' : Date.now() > K.exp ? 'Invitation expired.' : 'Expires in ' + Math.ceil((K.exp - Date.now()) / 6e4) + ' min' }, 1000) }
+    async function startGuest(code) { const sec = unb32(code.toUpperCase().replace(/[^0-9A-Z]/g, '')); if (!sec) return toast('That invite code isn’t valid. Check it and try again.'); await derive(sec); Object.assign(K, { host: 0, mine: 'b', nm: ['', ''], admitted: 0, hostPeer: null }); if (!await openRoom()) return; setP('waiting'); showLobby(); $c('cInvP').hidden = true; let n = 0; const kn = () => { if (K.admitted || !K.r) return; if (n++ > 4) { toast('No answer: the invitation may be invalid, expired or revoked, or the host has left.'); return cleanup() } send({ t: 'knock', pid: me() }); K.kt = setTimeout(kn, 2500) }; kn() }
+    $c('cInv').onclick = startHost; $c('cJoin').onclick = () => startGuest($c('cCode').value);
+    $c('cCopy').onclick = () => navigator.clipboard ? navigator.clipboard.writeText(K.link).then(() => toast('Invite link copied 💌'), () => toast('Couldn’t copy — select the link and copy it.')) : toast('Clipboard unavailable — select the link and copy it.');
+    $c('cShare').onclick = async () => { const d = { title: 'LDR PhotoBooth', text: $c('cMsg').textContent + ' Code: ' + K.code, url: K.link }; if (navigator.share) { try { await navigator.share(d) } catch (e) { } } else toast('Sharing isn’t available here — copy the link instead.') };
+    async function onMsg(m) {
+      if (!K.r || (m.isMe && m.sameTab)) return; const o = await dec(m.data && m.data.c); if (!o) return; const f = m.peer;
+      if (o.t == 'knock' && K.host) { if (K.rev) return send({ t: 'deny', to: f, why: 'This invitation was revoked.' }); if (K.partner && K.partner != f) return send({ t: 'deny', to: f, why: 'This room is full.' }); if (!K.partner && Date.now() > K.exp) return send({ t: 'deny', to: f, why: 'This invitation has expired.' }); if (K.partner == f) return admit(f); K.knock = f; $c('cKnock').innerHTML = '<div class="card">💌 Someone with your code wants to join. <button id="cYes">Admit</button> <button id="cNo2">Deny</button></div>'; $c('cYes').onclick = () => admit(f); $c('cNo2').onclick = () => { send({ t: 'deny', to: f, why: 'The host declined.' }); $c('cKnock').innerHTML = '' } }
+      else if (o.t == 'admit' && !K.host && !K.admitted && o.to == me()) { K.admitted = 1; K.hostPeer = f; K.nm = o.nm; comp = o.comp; setP('connected'); refresh() }
+      else if (o.t == 'deny' && !K.host && o.to == me()) { toast(o.why || 'Couldn’t join.'); cleanup() }
+      else if (o.t == 'kick' && o.to == me() && f == K.hostPeer) cleanup('The host removed you from the session.');
+      else if (o.t == 'end' && f == partnerPeer()) cleanup('Session ended. Temporary photos were deleted.');
+      else if (f == partnerPeer()) {
+        if (o.t == 'chunk' && o.n > 0 && o.n <= 120 && o.i >= 0 && o.i < o.n && typeof o.d == 'string' && ['image/webp', 'image/png'].includes(o.ty)) { const r = rx[o.id] || (rx[o.id] = { n: o.n, p: {}, ty: o.ty }); r.p[o.i] = o.d; clearTimeout(r.t); if (Object.keys(r.p).length == r.n) { delete rx[o.id]; try { const bm = await createImageBitmap(new Blob([ub64(Array.from({ length: r.n }, (_, i) => r.p[i]).join(''))], { type: r.ty })), c = document.createElement('canvas'); c.width = bm.width; c.height = bm.height; c.getContext('2d').drawImage(bm, 0, 0); caps[other()] = c; cdraw(); toast('Your partner’s photo arrived 💗') } catch (e) { toast('Received a photo that couldn’t be read.') } } else r.t = setTimeout(() => send({ t: 'need', id: o.id, miss: [...Array(r.n).keys()].filter(i => !(i in r.p)).slice(0, 40) }), 2500) }
+        else if (o.t == 'need' && sent[o.id] && Array.isArray(o.miss)) o.miss.forEach((i, k) => setTimeout(() => send({ t: 'chunk', id: o.id, i, n: sent[o.id].ps.length, d: sent[o.id].ps[i], ty: sent[o.id].ty }), k * 50));
+        else if (o.t == 'comp' && o.s && comp && comp.pen == other()) { comp = o.s; syncCtl(); cdraw() }
+        else if (o.t == 'next') { caps.a = caps.b = null; comp = o.s; K.shot = null; $c('cPv').hidden = true; setP(cstream ? 'camera' : 'connected'); syncCtl(); cdraw() }
+      }
+    }
+    function admit(f) { K.partner = f; $c('cKnock').innerHTML = ''; send({ t: 'admit', to: f, nm: K.nm, comp }); setP('connected'); refresh() }
+    const LBL = { waiting: '⏳ Waiting', connected: '🔗 Connected', camera: '📷 Camera ready', captured: '✅ Photo captured' };
+    function peersChanged(ch) {
+      if (!K.r) return; const ps = K.r.peers(); let h = ''; for (const l of ['host', 'guest']) { const p = ps.find(x => x.presence.role == l); h += `<div class="card"><b>${esc(l == 'host' ? (K.nm[0] || 'Host') : (K.nm[1] || 'Partner'))}${p && p.isMe ? ' (you)' : ''}</b><br>${p ? LBL[p.presence.st] || LBL.connected : '⏳ Waiting to join'}</div>` } $c('cSt').innerHTML = h;
+      if (ch && ch.left.some(p => p.peer == partnerPeer())) { toast('Your partner disconnected.'); if (K.host) K.partner = null; else { K.admitted = 0; K.hostPeer = null } refresh() }
+    }
+    function cleanup(msg) { clearTimeout(K.kt); clearInterval(K.et); cstream && cstream.getTracks().forEach(t => t.stop()); cstream = null; (K.off || []).forEach(f => f()); K.off = []; K.r && K.r.leave(); K.r = null; K.admitted = 0; K.partner = null; K.shot = null; caps.a = caps.b = null; imgs[cIdx] = null; rx = {}; sent = {}; $c('c1').hidden = true; $c('c0').hidden = false; $c('cKnock').innerHTML = ''; $c('cCamBox').hidden = true; $c('cPv').hidden = true; if (msg) toast(msg) }
+    $c('cEnd').onclick = async () => { if (K.host && K.partner) { await send({ t: 'end' }); await wait(300) } cleanup('Session closed. Temporary photos were deleted — saved memories stay.') };
+    $c('cRev').onclick = () => { K.rev = 1; toast('Invitation revoked.') };
+    $c('cKick').onclick = () => { if (!K.partner) return; send({ t: 'kick', to: K.partner }); K.partner = null; K.rev = 1; caps.b = null; refresh(); toast('Partner removed and invitation revoked. End the session and start a new one to invite again.') };
+    // camera + cutout
+    $c('cCam').onclick = async () => { if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return toast('Camera isn’t supported on this device or connection (needs HTTPS).'); try { cstream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 1200 } }, audio: false }); $c('cVid').srcObject = cstream; await $c('cVid').play(); $c('cCamBox').hidden = false; setP('camera') } catch (e) { toast(e.name == 'NotAllowedError' ? 'Camera permission denied — allow it in your browser settings to join in.' : 'Couldn’t open the camera: ' + e.message) } };
+    $c('cSnap').onclick = async () => { const cd = $c('cCd'), v = $c('cVid'); for (let k = +$c('cTm').value; k > 0; k--) { cd.textContent = k; cd.hidden = false; await wait(1000) } cd.hidden = true; const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight; const x = c.getContext('2d'); x.translate(c.width, 0); x.scale(-1, 1); x.drawImage(v, 0, 0); K.raw = c; pv() };
+    function cut(src, tol) {
+      const k = Math.min(1, 520 / Math.max(src.width, src.height)), w = Math.round(src.width * k), h = Math.round(src.height * k), c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(src, 0, 0, w, h); const d = x.getImageData(0, 0, w, h), p = d.data; let r = 0, g = 0, b = 0, n = 0; const add = i => { r += p[i]; g += p[i + 1]; b += p[i + 2]; n++ }; for (let i = 0; i < w; i++) { add(i * 4); add(((h - 1) * w + i) * 4) } for (let j = 0; j < h; j++) { add(j * w * 4); add((j * w + w - 1) * 4) } r /= n; g /= n; b /= n;
+      const T = tol * tol, seen = new Uint8Array(w * h), q = [], near = i => { const dr = p[i * 4] - r, dg = p[i * 4 + 1] - g, db = p[i * 4 + 2] - b; return dr * dr + dg * dg + db * db < T }, ps = i => { if (!seen[i] && near(i)) { seen[i] = 1; q.push(i) } };
+      for (let i = 0; i < w; i++) { ps(i); ps((h - 1) * w + i) } for (let j = 0; j < h; j++) { ps(j * w); ps(j * w + w - 1) }
+      while (q.length) { const i = q.pop(), x0 = i % w, y0 = (i / w) | 0; if (x0 > 0) ps(i - 1); if (x0 < w - 1) ps(i + 1); if (y0 > 0) ps(i - w); if (y0 < h - 1) ps(i + w) }
+      let cnt = 0; const e = []; for (let i = 0; i < w * h; i++)if (seen[i]) { p[i * 4 + 3] = 0; cnt++ } else if (i > w && i < w * h - w && (seen[i - 1] || seen[i + 1] || seen[i - w] || seen[i + w])) e.push(i); e.forEach(i => p[i * 4 + 3] = 130); x.putImageData(d, 0, 0); c.frac = cnt / (w * h); return c
+    }
+    function pv() { if (!K.raw) return; const c = $c('cCut').checked ? cut(K.raw, +$c('cTol').value) : K.raw, p = $c('cPrev'), k = Math.min(1, 300 / c.width); p.width = c.width * k; p.height = c.height * k; p.getContext('2d').drawImage(c, 0, 0, p.width, p.height); K.shot = c; $c('cPv').hidden = false; if (c.frac > .9) toast('The cutout removed almost everything — lower the strength or turn it off.') }
+    $c('cCut').onchange = $c('cTol').onchange = pv; $c('cRe').onclick = () => { K.raw = K.shot = null; $c('cPv').hidden = true; $c('cOk').checked = false };
+    async function sendImg(c) {
+      const id = Math.random().toString(36).slice(2, 8); let s = 520, b; for (; ;) { const t = document.createElement('canvas'), k = Math.min(1, s / Math.max(c.width, c.height)); t.width = Math.round(c.width * k); t.height = Math.round(c.height * k); t.getContext('2d').drawImage(c, 0, 0, t.width, t.height); b = await new Promise(r => t.toBlob(r, 'image/webp', .82)); if (b.size < 95e3 || s < 200) break; s *= .8 }
+      const d = b64(new Uint8Array(await b.arrayBuffer())), n = Math.ceil(d.length / 2200), ps = []; for (let i = 0; i < n; i++)ps.push(d.slice(i * 2200, (i + 1) * 2200)); sent[id] = { ps, ty: b.type }; for (let i = 0; i < n; i++) { await send({ t: 'chunk', id, i, n, d: ps[i], ty: b.type }); await wait(45) }
+    }
+    $c('cSend').onclick = async () => { if (!K.shot) return; if (!$c('cOk').checked) return toast('Please confirm you agree to share this photo with your partner.'); if (!partnerPeer()) return toast('Wait until your partner is connected.'); caps[K.mine] = K.shot; setP('captured'); cdraw(); toast('Sending…'); await sendImg(K.shot); toast('Photo sent 💗') };
+    // composition
+    function compose() {
+      const c = document.createElement('canvas'); c.width = 528; c.height = 540; const x = c.getContext('2d'), g = x.createLinearGradient(0, 0, 528, 540); g.addColorStop(0, BG[comp.bg][0]); g.addColorStop(1, BG[comp.bg][1]); x.fillStyle = g; x.fillRect(0, 0, 528, 540); x.globalAlpha = .35; x.font = '26px serif'; x.textAlign = 'center'; for (let i = 0; i < 14; i++)x.fillText(i % 3 ? '💗' : '✨', (i * 97) % 500 + 14, (i * 53) % 480 + 30); x.globalAlpha = 1;
+      for (const k of ['a', 'b']) { const im = caps[k]; if (!im) continue; const [px, py, s] = comp[k], h = 400 * s, w = h * im.width / im.height, cx = px * 528, by = py * 540; x.save(); if (comp.sh) { x.fillStyle = 'rgba(0,0,0,.22)'; x.shadowColor = 'rgba(0,0,0,.35)'; x.shadowBlur = 16; x.beginPath(); x.ellipse(cx, by, w * .38, h * .035, 0, 0, 7); x.fill(); x.shadowOffsetY = 6 } x.drawImage(im, cx - w / 2, by - h, w, h); x.restore() }
+      imgs[cIdx] = c
+    }
+    function cdraw() { if (!comp || $c('cComp').hidden) return; compose(); cs = { ...newSt(), f: comp.f, cap: comp.cap, label: comp.lab, date: comp.dt, names: [K.nm[0] || '', K.nm[1] || ''], slots: [{ ...blank(), im: cIdx }], stk: comp.stk.map(([v, x, y, s]) => ({ t: 'e', v, x, y, s, r: 0 })) }; render($c('cc').getContext('2d'), cs, 1, 0) }
+    function syncCtl() { const w = $c('cWho').value, a = comp[w]; $c('cx').value = a[0]; $c('cy').value = a[1]; $c('cz').value = a[2]; $c('cBg').value = comp.bg; $c('cSh').checked = !!comp.sh; $c('cCap').value = comp.cap; $c('cLab').value = comp.lab; $c('cDt').value = comp.dt; $c('cCtl').disabled = comp.pen != K.mine; $c('cPen').textContent = comp.pen == K.mine ? '✏️ It’s your turn to edit.' : '⏳ ' + (K.nm[comp.pen == 'a' ? 0 : 1] || 'Your partner') + ' is editing — you’ll get the pen when they pass it.'; $c('cWho').options[0].text = K.nm[0] || 'Partner A'; $c('cWho').options[1].text = K.nm[1] || 'Partner B' }
+    function upd(fn) { if (!comp || comp.pen != K.mine) return; fn(); cdraw(); clearTimeout(K.ct); K.ct = setTimeout(() => send({ t: 'comp', s: comp }), 150) }
+    $c('cWho').onchange = syncCtl;
+    [['cx', () => comp[$c('cWho').value][0] = +$c('cx').value], ['cy', () => comp[$c('cWho').value][1] = +$c('cy').value], ['cz', () => comp[$c('cWho').value][2] = +$c('cz').value], ['cBg', () => comp.bg = +$c('cBg').value], ['cSh', () => comp.sh = $c('cSh').checked ? 1 : 0], ['cCap', () => comp.cap = $c('cCap').value], ['cLab', () => comp.lab = $c('cLab').value], ['cDt', () => comp.dt = $c('cDt').value]].forEach(([i, f]) => $c(i).oninput = () => upd(f));
+    $c('cFp').onclick = () => upd(() => comp.f = (comp.f + F.length - 1) % F.length); $c('cFn').onclick = () => upd(() => comp.f = (comp.f + 1) % F.length);
+    ['💗', '✨', '☁️', '✈️', '🌸', '⭐', '💌'].forEach(e => { const b = document.createElement('button'); b.className = 'sk'; b.textContent = e; b.onclick = () => upd(() => { if (comp.stk.length < 12) comp.stk.push([e, 60 + Math.random() * 480 | 0, 60 + Math.random() * 440 | 0, 64]) }); $c('cEmo').append(b) });
+    $c('cPass').onclick = () => { if (comp.pen != K.mine) return toast('You don’t have the pen right now.'); comp.pen = other(); syncCtl(); send({ t: 'comp', s: comp }) };
+    const asC = async fn => { const t = st; st = cs; try { await fn() } finally { st = t } };
+    $c('cDl').onclick = () => cs && asC(() => $('#dl').onclick()); $c('cSv').onclick = () => cs && asC(() => $('#sv').onclick());
+    $c('cEd').onclick = () => { if (!cs) return; push(); const cp = document.createElement('canvas'); cp.width = 528; cp.height = 540; cp.getContext('2d').drawImage(imgs[cIdx], 0, 0); imgs.push(cp); st = JSON.parse(JSON.stringify(cs)); st.slots = [{ ...blank(), im: imgs.length - 1 }]; sel = null; sync(); location.hash = 'booth' };
+    $c('cNext').onclick = () => { if (!partnerPeer()) return; const p = comp.pen; comp = newComp(); comp.pen = p; caps.a = caps.b = null; K.shot = K.raw = null; $c('cPv').hidden = true; $c('cOk').checked = false; setP(cstream ? 'camera' : 'connected'); send({ t: 'next', s: comp }); syncCtl(); cdraw() };
+    { const q = new URLSearchParams(location.search).get('join') || new URLSearchParams(location.hash.slice(1)).get('join'); if (q) { $c('cCode').value = q; location.hash = 'collab' } }
+  </script>
+</body>
+
+</html>
